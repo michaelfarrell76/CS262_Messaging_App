@@ -1,6 +1,7 @@
 var $loginButton = $('.login_button'); // Input message input box
 var $registerButton = $('.register_button'); // Input message input box
 var $loginInput = $('.loginInput');
+var $window = $(window);
 
 // Need to show login/registration failures
 function warning (message) {
@@ -49,3 +50,18 @@ $registerButton.click(function(){
   	window.location.replace("register");
   };
 })
+
+$window.keydown(function (event) {
+  // When the client hits ENTER on their keyboard
+  if (event.which === 13) {
+	  if (document.URL.indexOf('register') != -1) { 
+	  	$registerButton.click()
+	  }
+	  else {
+	  	$loginButton.click()
+	  }
+  }
+});
+
+
+
