@@ -1,5 +1,7 @@
+
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
+var global_latest_message_id = 0;
 var COLORS = [
   '#e21400', '#91580f', '#f8a700', '#f78b00',
   '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
@@ -11,16 +13,25 @@ var $window = $(window);
 var $usernameInput = $('.usernameInput'); // Input for username
 var $messages = $('.messages'); // Messages area
 var $inputMessage = $('.inputMessage'); // Input message input box
+var $loginButton = $('.login_button'); // Input message input box
+var $registerButton = $('.register_button'); // Input message input box
 
 var $loginPage = $('.login.page'); // The login page
 var $chatPage = $('.chat.page'); // The chatroom page
 
 // Prompt for setting a username
 var username;
+var email = 'kyang01@college.harvard.edu'
 var connected = false;
 var typing = false;
 var lastTypingTime;
 var $currentInput = $usernameInput.focus();
+
+username = 'Kevin'
+$loginPage.fadeOut();
+$chatPage.show();
+$loginPage.off('click');
+$currentInput = $inputMessage.focus();
 
 function addParticipantsMessage (data) {
   var message = '';
@@ -35,7 +46,6 @@ function addParticipantsMessage (data) {
 // Sets the client's username
 function setUsername () {
   username = cleanInput($usernameInput.val().trim());
-
   // If the username is valid
   if (username) {
     $loginPage.fadeOut();
@@ -48,18 +58,49 @@ function setUsername () {
 // Sends a chat message
 function sendMessage () {
   var message = $inputMessage.val();
-  // Prevent markup from being injected into the message
   message = cleanInput(message);
-  // if there is a non-empty message and a socket connection
   if (message) {
     $inputMessage.val('');
-    addChatMessage({
-      username: username,
-      message: message
-    });
-    // tell server to execute 'new message' and send along one parameter
-    //new_message(message);
+    $.post("send_message", {message:message, email:email})
   }
+}
+
+function updateChat() {
+  data = {format:'json'}
+  url = 'get_messages'
+  success = function(messages) {
+    var messages_len = messages.length
+    newest_message_id = messages[0][0]
+    if (newest_message_id > global_latest_message_id) {
+      last_message_id = global_latest_message_id
+      global_latest_message_id = newest_message_id
+      messages_out = []
+      for (var i = 0; i < messages_len; i++) { 
+        message = messages[i]
+        if (message[0] > last_message_id) {
+          message_data = {}
+          message_data.latest_id = message[0]
+          message_data.username = message[1]
+          message_data.message = message[2] 
+          messages_out.push(message_data)
+        }
+        else {
+          break
+        }
+      }
+
+      messages_out.reverse()
+      for (var j = 0; j < messages_out.length; j++) {
+        addChatMessage(messages_out[j])
+      }
+    }
+  }
+  $.ajax({
+  dataType: "json",
+  url: url,
+  data: data,
+  success: success
+});
 }
 
 // Log a message
@@ -156,7 +197,6 @@ function updateTyping () {
       var typingTimer = (new Date()).getTime();
       var timeDiff = typingTimer - lastTypingTime;
       if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-        stop_typing();
         typing = false;
       }
     }, TYPING_TIMER_LENGTH);
@@ -193,13 +233,16 @@ $window.keydown(function (event) {
   if (event.which === 13) {
     if (username) {
       sendMessage();
-      stop_typing();
       typing = false;
     } else {
       setUsername();
     }
   }
 });
+
+window.setInterval(function(){
+  updateChat();
+}, 1000);
 
 $inputMessage.keydown(function (e) {
   if (e.keyCode == 13)
@@ -208,13 +251,7 @@ $inputMessage.keydown(function (e) {
   }
 });
 
-
-$inputMessage.on('input', function() {
-  updateTyping();
-});
-
 // Click events
-
 // Focus input when clicking anywhere on login page
 $loginPage.click(function () {
   $currentInput.focus();
@@ -224,44 +261,3 @@ $loginPage.click(function () {
 $inputMessage.click(function () {
   $inputMessage.focus();
 });
-
-// Socket events
-
-// // Whenever the server emits 'login', log the login message
-// function login (data) {
-//   connected = true;
-//   // Display the welcome message
-//   var message = "Welcome to Chat – ";
-//   log(message, {
-//     prepend: true
-//   });
-//   addParticipantsMessage(data);
-// };
-
-// // Whenever the server emits 'new message', update the chat body
-// function new_message (data) {
-//   addChatMessage(data);
-// };
-
-// // Whenever the server emits 'user joined', log it in the chat body
-// function user_joined (data) {
-//   log(data.username + ' joined');
-//   addParticipantsMessage(data);
-// };
-
-// // Whenever the server emits 'user left', log it in the chat body
-// function user_left (data) {
-//   log(data.username + ' left');
-//   addParticipantsMessage(data);
-//   removeChatTyping(data);
-// };
-
-// // Whenever the server emits 'typing', show the typing message
-// function typing (data) {
-//   addChatTyping(data);
-// };
-
-// // Whenever the server emits 'stop typing', kill the typing message
-// function stop_typing (data) {
-//   removeChatTyping(data);
-// };

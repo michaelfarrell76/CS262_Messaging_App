@@ -4,5 +4,5 @@ The flask application package.
 
 from flask import Flask
 app = Flask(__name__)
-
-import Messenger.views
+app.config.from_pyfile('config.py')
+import Messenger.application
