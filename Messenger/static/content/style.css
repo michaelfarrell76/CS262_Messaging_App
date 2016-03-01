@@ -252,7 +252,7 @@ ul {
 /* Input */
 
 .inputMessage {
-  border: 10px solid #000;
+  border: 10px solid rgba(0, 0, 0, 0.2);
   bottom: 0;
   height: 60px;
   left: 0;
@@ -261,4 +261,25 @@ ul {
   position: absolute;
   right: 0;
   width: 100%;
+}
+
+/* Sidebar */
+
+.sidebar {
+    position:absolute;
+    top:0; bottom:0; right:0;
+    width:220px;
+    background:rgba(0, 0, 0, 0.2);
+}
+
+.list-general {
+
+}
+
+.list-general .list-users {
+
+}
+
+.list-general .list-groups {
+  
 }

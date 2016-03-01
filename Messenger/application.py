@@ -13,7 +13,7 @@ from datetime import datetime
 import flask
 from flask import request, Response, render_template, flash, redirect
 
-import _mysql
+import mysql
 import sqlalchemy 
 from sqlalchemy.orm import sessionmaker, scoped_session
 from auth.auth import User
@@ -33,7 +33,7 @@ application.config.from_object('config')
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
 # Not the most secure, but oh well
-application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://cs262admin:cs262project@messenger.c57b9wmfsuhp.us-east-1.rds.amazonaws.com/messenger'
+application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://cs262admin:cs262project@messenger.c57b9wmfsuhp.us-east-1.rds.amazonaws.com/messenger'
 engine = sqlalchemy.create_engine(application.config['SQLALCHEMY_DATABASE_URI'])
 
 # Authentication for the application
@@ -194,7 +194,13 @@ def get_users():
     result = s.execute('SELECT * FROM users')
     s.close()
     results = result.fetchall()
-    return str(results)
+    out = []
+    for result in results:
+        user_id = result[0]
+        name = result[1]
+        email = result[2]
+        out.append((user_id, name, email))
+    return json.dumps(out)
 
 @application.route('/logout')
 def logout():
