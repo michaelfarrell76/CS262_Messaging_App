@@ -194,42 +194,53 @@ def get_users():
     result = s.execute('SELECT * FROM users')
     s.close()
     results = result.fetchall()
-    return str(results)
+    out = []
+    for result in results:
+        user_id = result[0]
+        name = result[1]
+        email = result[2]
+        out.append((user_id, name, email))
+    return json.dumps(out)
 
 @application.route('/logout')
 def logout():
     flask_login.logout_user()
     return redirect("login", code=302)
 
-@application.route('/create_group', methods=['POST'])
+@application.route('/create_group', methods=['POST', 'GET'])
+@application.route('/create_group')
 def create_group():
-    groupname = request.form['groupname']
-    user_ids = request.form['']
+    if request.method == 'POST':
+        groupname = request.form['groupname']
+        user_ids = request.form['']
 
-    Session = scoped_session(sessionmaker(bind=engine))
-    s = Session()
-    result_proxy = s.execute('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
-    s.close()
-    result = result_proxy.fetchone()
-    if result is not None:
-        flash('That group has already been created')
-        return json.dumps({}, 403, {'ContentType':'application/json'})
-    try:
         Session = scoped_session(sessionmaker(bind=engine))
         s = Session()
-        s.execute('INSERT INTO groups(name, user_ids) VALUES ("' + str(name) + '","' + str(user_ids) + '")') 
-        result_proxy = s.execute ('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
-        s.commit()
+        result_proxy = s.execute('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
         s.close()
         result = result_proxy.fetchone()
-        group_id = result[0]
-        group = User(group_id, groupname, user_ids)
-        flask_login.login_user(group)
-        data = {'user_ids': user_ids, 'groupname':groupname}
-        return json.dumps(data, 200, {'ContentType':'application/json'})
-    except:
-        return json.dumps({}, 403, {'ContentType':'application/json'})
-    
+        if result is not None:
+            flash('That group has already been created')
+            return json.dumps({}, 403, {'ContentType':'application/json'})
+        try:
+            Session = scoped_session(sessionmaker(bind=engine))
+            s = Session()
+            s.execute('INSERT INTO groups(name, user_ids) VALUES ("' + str(name) + '","' + str(user_ids) + '")') 
+            result_proxy = s.execute ('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
+            s.commit()
+            s.close()
+            result = result_proxy.fetchone()
+            group_id = result[0]
+            group = User(group_id, groupname, user_ids)
+            flask_login.login_user(group)
+            data = {'user_ids': user_ids, 'groupname':groupname}
+            return json.dumps(data, 200, {'ContentType':'application/json'})
+        except:
+            return json.dumps({}, 403, {'ContentType':'application/json'})
+    else:
+        return render_template(
+            'create_group.html'
+        )
 
 @application.route('/get_groups')
 def get_groups():

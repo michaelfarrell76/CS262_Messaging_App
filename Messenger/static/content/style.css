@@ -187,6 +187,69 @@ ul {
   color:white;
   user-select:none;
  }
+
+/* Create_group page */
+
+.create_group.page {
+  background-color: #000;
+}
+
+.create_group.page .form {
+  height: 100px;
+  margin-top: -100px;
+  position: absolute;
+
+  text-align: center;
+  top: 35%;
+  width: 100%;
+}
+
+.create_group.page .form .loginInput {
+  background-color: transparent;
+  border: none;
+  border-bottom: 2px solid #fff;
+  outline: none;
+  padding-bottom: 15px;
+  text-align: center;
+  width: 400px;
+}
+
+.create_group.page .title {
+  font-size: 150%;
+}
+
+.create_group.page .loginInput {
+  font-size: 150%;
+  letter-spacing: 3px;
+}
+
+.create_group_button {
+  display: table;
+  position: absolute;
+  width:15%;
+  height:8%;
+  border:1px solid #FFF;
+  top:70%;
+  right:32%;
+  color:white;
+}
+
+.create_group.page .create_group_button {
+  display: table;
+  position: absolute;
+  width:15%;
+  height:8%;
+  border:1px solid #FFF;
+  top:72%;
+  right:42.5%;
+  color:white;
+  user-select:none;
+ }
+
+.create_group.page .title, .create_group.page .loginInput {
+  color: #fff;
+  font-weight: 100;
+}
 /* Chat page */
 
 .chat.page {
@@ -252,7 +315,7 @@ ul {
 /* Input */
 
 .inputMessage {
-  border: 10px solid #000;
+  border: 10px solid rgba(0, 0, 0, 0.2);
   bottom: 0;
   height: 60px;
   left: 0;
@@ -261,4 +324,25 @@ ul {
   position: absolute;
   right: 0;
   width: 100%;
+}
+
+/* Sidebar */
+
+.sidebar {
+    position:absolute;
+    top:0; bottom:0; right:0;
+    width:220px;
+    background:rgba(0, 0, 0, 0.2);
+}
+
+.list-general {
+
+}
+
+.list-general .list-users {
+
+}
+
+.list-general .list-groups {
+  
 }

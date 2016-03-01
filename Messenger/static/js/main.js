@@ -2,6 +2,7 @@
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var global_latest_message_id = 0;
+var global_user_count = 0
 var COLORS = [
   '#e21400', '#91580f', '#f8a700', '#f78b00',
   '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
@@ -15,6 +16,7 @@ var $messages = $('.messages'); // Messages area
 var $inputMessage = $('.inputMessage'); // Input message input box
 var $loginButton = $('.login_button'); // Input message input box
 var $registerButton = $('.register_button'); // Input message input box
+var $userList = $('.list-users');
 
 var $loginPage = $('.login.page'); // The login page
 var $chatPage = $('.chat.page'); // The chatroom page
@@ -69,6 +71,7 @@ function updateChat() {
   data = {format:'json'}
   url = 'get_messages'
   success = function(messages) {
+    //console.log(messages)
     var messages_len = messages.length
     newest_message_id = messages[0][0]
     if (newest_message_id > global_latest_message_id) {
@@ -101,6 +104,51 @@ function updateChat() {
   data: data,
   success: success
 });
+}
+
+function updateUsers(){
+    url = "get_users"
+    data = {format:'json'}
+
+    success = function(users) {
+      var num_users = users.length
+      //console.log(num_users)
+      
+      if (num_users > global_user_count) {
+        console.log(global_user_count)
+        global_user_count = num_users
+        latest_user_id = users[0][0]
+        users_out = []
+        console.log(num_users)
+        for (var i = 0; i < num_users; i++) { 
+          console.log(latest_user_id)
+          user = users[i]
+          if (user[0] >= latest_user_id) {
+            user_data = {}
+            user_data.user_id = user[0]
+            user_data.name = user[1]
+            user_data.email = user[2] 
+            users_out.push(user_data)
+          }
+          else {
+            break
+          }
+        }
+        console.log(users_out)
+        users_out.reverse()
+        for (var j = 0; j < users_out.length; j++) {
+          addUsersToList(users_out[j])
+        }
+      }
+    }
+
+    a = $.ajax({
+      dataType: "json",
+      url: url,
+      data: data,
+      success: success
+    });
+    //console.log(a)
 }
 
 // Log a message
@@ -147,6 +195,14 @@ function removeChatTyping (data) {
     $(this).remove();
   });
 }
+
+function addUsersToList(data){
+  console.log(data)
+  console.log("adding users")
+  $userList.append($('<li>' + data.name + '</li>'))
+}
+
+
 
 // Adds a message element to the messages and scrolls to the bottom
 // el - The element to add as a message
@@ -221,7 +277,6 @@ function getUsernameColor (username) {
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
 }
-
 // Keyboard events
 
 $window.keydown(function (event) {
@@ -240,9 +295,20 @@ $window.keydown(function (event) {
   }
 });
 
+// run coder once as soon as everything is ready
+$(document).ready(function(){
+  updateUsers();
+});
+
 window.setInterval(function(){
   updateChat();
 }, 1000);
+
+window.setInterval(function(){
+  updateUsers();
+}, 5000);
+
+
 
 $inputMessage.keydown(function (e) {
   if (e.keyCode == 13)
