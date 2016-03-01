@@ -335,14 +335,16 @@ ul {
     background:rgba(0, 0, 0, 0.2);
 }
 
-.list-general {
+.seperator {
+  height: 15px;
+  background: black;
+  color: white;
+}
+
+.list-users {
 
 }
 
-.list-general .list-users {
+.list-groups {
 
-}
-
-.list-general .list-groups {
-  
 }
