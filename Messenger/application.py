@@ -174,11 +174,8 @@ def send_message():
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
-
-    other_user = request.values.get('user_id')
-
+    other_user =  request.form['user_id']
     print(other_user)
-
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     
@@ -186,12 +183,12 @@ def get_message():
     s.close()
     results = result_proxy.fetchall()
     out = []
-    print(results)
+
     for result in results:
-        print(result)
         message_id = result[0]
         name = other_user
         message = result[3]
+
         out.append((message_id, name, message))
     return json.dumps(out)
 

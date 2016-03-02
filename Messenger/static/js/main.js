@@ -31,6 +31,7 @@ var $currentInput = $usernameInput.focus();
 
 username = 'Kevin'
 currently_selected = null;
+change_user = false;
 $loginPage.fadeOut();
 $chatPage.show();
 $loginPage.off('click');
@@ -78,9 +79,10 @@ function updateChat() {
       last_message_id = global_latest_message_id
       global_latest_message_id = newest_message_id
       messages_out = []
+      
       for (var i = 0; i < messages_len; i++) { 
         message = messages[i]
-        if (message[0] > last_message_id) {
+        if (change_user || message[0] > last_message_id) {
           message_data = {}
           message_data.latest_id = message[0]
           message_data.username = message[1]
@@ -93,16 +95,22 @@ function updateChat() {
       }
 
       messages_out.reverse()
+      if(change_user){
+        $messageDiv.clear();
+      }
       for (var j = 0; j < messages_out.length; j++) {
         addChatMessage(messages_out[j])
+      }
+      if(change_user){
+        change_user = false;
       }
     }
   }
   if (currently_selected){
-    data = {user_id: currently_selected}
+    data = {user_id: cleanInput(currently_selected)}
+  
 
     url = 'get_messages'
-    // $.post(url, data)
     $.ajax({
       type: "POST",
       dataType: "json",
@@ -333,7 +341,7 @@ document.getElementById("delete_account").onclick = function () {
 $('#user_select').change(function(){ 
 
   currently_selected = $(this).val();
-  alert(currently_selected);
+  change_user = true;
   });
     
 
