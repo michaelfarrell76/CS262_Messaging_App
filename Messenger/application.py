@@ -226,18 +226,15 @@ def get_message():
         group_id = results[0][0]
 
         
-        result_proxy = s.execute('SELECT * from messages where group_id= %s' % group_id)
+        result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
         s.close()
         results = result_proxy.fetchall()
-        
-
         for result in reversed(results):
-
             message_id = result[0]
             name = result[1]
-            message = result[3]
-
+            message = result[2]
             out.append((message_id, name, message))
+
     return json.dumps(out)
 
 @application.route('/get_users')
