@@ -30,10 +30,12 @@ var username;
 var lastTypingTime;
 var currently_selected = null;
 var type_selected = null;
+var chat_name = null;
 
 var connected = false;
 var typing = false;
 var change_user = false;
+
 
 $chatPage.show();
 $currentInput = $inputMessage.focus();
@@ -345,6 +347,7 @@ $("#delete_account").click(function() {
 //Update infor that new user is selected
 $('#u_sel').change(function(){ 
   type_selected = 'user';
+  chat_name = $('#u_sel option:selected').text();
   currently_selected = $(this).val();
   change_user = true;
    $('#g_sel option').removeAttr("selected");
@@ -353,6 +356,7 @@ $('#u_sel').change(function(){
 //Update infor that new group is selected
 $('#g_sel').change(function(){ 
   type_selected = 'group';
+  chat_name = $('#g_sel option:selected').text();
   currently_selected = $(this).val();
   change_user = true;
    $('#u_sel option').removeAttr("selected");

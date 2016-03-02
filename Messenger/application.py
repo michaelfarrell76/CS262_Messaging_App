@@ -212,12 +212,16 @@ def get_message():
     select_type =  request.form['select_type']
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
+    out = []
     if select_type == "user":
         user_ids = sorted([current_user.id, other_user])
         users_str = '"[' + ", ".join(user_ids) + ']"'
         query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' %users_str
         result_proxy = s.execute(query)
         result = result_proxy.fetchone()
+        if result is None:
+            s.close()
+            return json.dumps(out)
         group_id = result[0]
     else:
         group_id = other_user
@@ -225,7 +229,7 @@ def get_message():
     result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
     s.close()
     results = result_proxy.fetchall()
-    out = []
+   
     for result in reversed(results):
         message_id = result[0]
         name = result[1]
