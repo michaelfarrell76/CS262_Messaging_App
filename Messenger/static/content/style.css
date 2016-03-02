@@ -281,11 +281,6 @@ ul {
   -ms-user-select: none;
 }
 
-.messages {
-  font-size: 120%;
-  padding: 10px;
-}
-
 .inputMessage {
   font-size: 100%;
 }
@@ -302,12 +297,18 @@ ul {
 .chatArea {
   height: 100%;
   padding-bottom: 60px;
+  top:10%;
+  position:absolute;
+  width:100%;
+  height:90%;
 }
 
 .messages {
   height: 100%;
   margin: 0;
   overflow-y: scroll;
+  font-size: 120%;
+  padding: 10px;
 }
 
 .message.typing .messageBody {
@@ -343,6 +344,14 @@ ul {
     top:0; bottom:0; right:0;
     width:220px;
     background:rgba(0, 0, 0, 0.2);
+}
+
+.topbar {
+  position:absolute;
+  top:0%; right:0;
+  height:10%;
+  width:100%;
+  background:rgba(0, 0, 0, 0.1);
 }
 
 .seperator {
