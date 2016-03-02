@@ -198,7 +198,6 @@ def send_message():
     group_name = result[1]
 
     message = request.form['message']
-    email = request.form['email']
 
     pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
     query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \

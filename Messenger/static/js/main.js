@@ -1,4 +1,3 @@
-
 var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var global_latest_message_id = 0;
@@ -18,67 +17,55 @@ var $inputMessage = $('.inputMessage'); // Input message input box
 var $loginButton = $('.login_button'); // Input message input box
 var $registerButton = $('.register_button'); // Input message input box
 var $userList = $('.list-users');
-
-var $loginPage = $('.login.page'); // The login page
 var $chatPage = $('.chat.page'); // The chatroom page
+
+var $currentInput = $usernameInput.focus();
+
+var delete_err_msg = "Are you sure you want to delete your account?\n\n This cannot be undone"
+var chat_int = 1000;
+var user_int = 5000;
 
 // Prompt for setting a username
 var username;
-var email = 'kyang01@college.harvard.edu'
+var lastTypingTime;
+var currently_selected = null;
+var type_selected = null;
+
 var connected = false;
 var typing = false;
-var lastTypingTime;
-var $currentInput = $usernameInput.focus();
+var change_user = false;
 
-username = 'Kevin'
-currently_selected = null;
-change_user = false;
-$loginPage.fadeOut();
 $chatPage.show();
-$loginPage.off('click');
 $currentInput = $inputMessage.focus();
-
-function addParticipantsMessage (data) {
-  var message = '';
-  if (data.numUsers === 1) {
-    message += "there's 1 participant";
-  } else {
-    message += "there are " + data.numUsers + " participants";
-  }
-  log(message);
-}
 
 // Sets the client's username
 function setUsername () {
   username = cleanInput($usernameInput.val().trim());
   // If the username is valid
   if (username) {
-    $loginPage.fadeOut();
     $chatPage.show();
-    $loginPage.off('click');
     $currentInput = $inputMessage.focus();
   }
 }
 
 // Sends a chat message
 function sendMessage () {
-  var message = $inputMessage.val();
-  message = cleanInput(message);
-  if (message) {
-    $inputMessage.val('');
-    data = {message:message, 
-            email:email,
-            other_uid: cleanInput(currently_selected),
-            select_type: 'user'}
-    $.post("send_message", data)
+  if (type_selected != null){
+    var message = cleanInput($inputMessage.val());
+    if (message) {
+      $inputMessage.val('');
+      data = {message:message, 
+              other_uid: cleanInput(currently_selected),
+              select_type: type_selected}
+      $.post("send_message", data)
+    }
   }
 }
 
+//Update the chat screen
 function updateChat() {
   
   success = function(messages) {
-
-    //console.log(messages)
     var messages_len = messages.length
     if(messages == ''){
       newest_message_id = 0
@@ -88,9 +75,8 @@ function updateChat() {
     }
    
     if(change_user){
-      global_latest_message_id = 0;
       $messages.empty();
-      
+      global_latest_message_id = 0;
     }
     if (newest_message_id > global_latest_message_id) {
       last_message_id = global_latest_message_id
@@ -123,15 +109,12 @@ function updateChat() {
   }
   if (currently_selected){
     data = {user_id: cleanInput(currently_selected),
-       select_type: 'user'}
-      
-  
+            select_type: type_selected}
 
-    url = 'get_messages'
     $.ajax({
       type: "POST",
       dataType: "json",
-      url: url,
+      url: 'get_messages',
       data: data,
       success: success
     });
@@ -139,12 +122,9 @@ function updateChat() {
 }
 
 function updateUsers(){
-    url = "get_users"
-    data = {format:'json'}
-
     success = function(users) {
+
       var num_users = users.length
-      //console.log(num_users)
       
       if (num_users > global_user_count) {
         console.log(global_user_count)
@@ -169,8 +149,7 @@ function updateUsers(){
         }
         console.log(users_out)
         users_out.reverse()
-        // $userList.empty();
-        // $("#user_select").empty()
+        $('#user_select').empty()
         for (var j = 0; j < users_out.length; j++) {
           var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
           $("#user_select").append(option)
@@ -178,13 +157,13 @@ function updateUsers(){
       }
     }
 
+    data = {format:'json'}
     a = $.ajax({
       dataType: "json",
-      url: url,
+      url: "get_users",
       data: data,
       success: success
     });
-    //console.log(a)
 }
 
 // Log a message
@@ -217,28 +196,6 @@ function addChatMessage (data, options) {
 
   addMessageElement($messageDiv, options);
 }
-
-// Adds the visual chat typing message
-function addChatTyping (data) {
-  data.typing = true;
-  data.message = 'is typing';
-  addChatMessage(data);
-}
-
-// Removes the visual chat typing message
-function removeChatTyping (data) {
-  getTypingMessages(data).fadeOut(function () {
-    $(this).remove();
-  });
-}
-
-function addUsersToList(data){
-  console.log(data);
-  console.log("adding users");
-  $userList.append($('<li>' + data.name + '</li>'));
-}
-
-
 
 // Adds a message element to the messages and scrolls to the bottom
 // el - The element to add as a message
@@ -276,25 +233,6 @@ function cleanInput (input) {
   return $('<div/>').text(input).text();
 }
 
-// Updates the typing event
-function updateTyping () {
-  if (connected) {
-    if (!typing) {
-      typing = true;
-      typing();
-    }
-    lastTypingTime = (new Date()).getTime();
-
-    setTimeout(function () {
-      var typingTimer = (new Date()).getTime();
-      var timeDiff = typingTimer - lastTypingTime;
-      if (timeDiff >= TYPING_TIMER_LENGTH && typing) {
-        typing = false;
-      }
-    }, TYPING_TIMER_LENGTH);
-  }
-}
-
 // Gets the 'X is typing' messages of a user
 function getTypingMessages (data) {
   return $('.typing.message').filter(function (i) {
@@ -313,8 +251,8 @@ function getUsernameColor (username) {
   var index = Math.abs(hash % COLORS.length);
   return COLORS[index];
 }
-// Keyboard events
 
+// Keyboard events
 $window.keydown(function (event) {
   // Auto-focus the current input when a key is typed
   if (!(event.ctrlKey || event.metaKey || event.altKey)) {
@@ -336,49 +274,48 @@ $(document).ready(function(){
   updateUsers();
 });
 
+//How often we update the chat
 window.setInterval(function(){
   updateChat();
-}, 1000);
+}, chat_int);
 
+//how often we update the users
 window.setInterval(function(){
   updateUsers();
-}, 5000);
+}, user_int);
 
- document.getElementById("logout").onclick = function () {
-        location.href = "/logout";
-    };
+//Logout of account
+$("#logout").click(function () {
+    location.href = "/logout";
+});
 
-
-document.getElementById("delete_account").onclick = function () {
-  var r = window.confirm("Are you sure you want to delete your account? This cannot be undone");
-  if (r) {
+//Delete account
+$("#delete_account").click(function() {
+  if (window.confirm(delete_err_msg)) {
     location.href = "/delete_account"; 
   }
-}
+});
 
+//Update infor that new user is selected
 $('#user_select').change(function(){ 
-
+  type_selected = 'user';
   currently_selected = $(this).val();
-
   change_user = true;
-  });
-    
+   $('#group_select option').removeAttr("selected");
+});
 
+//Update infor that new group is selected
+$('#group_select').change(function(){ 
+  type_selected = 'group';
+  currently_selected = $(this).val();
+  change_user = true;
+   $('#user_select option').removeAttr("selected");
+});
+    
+//Send messsage on enter
 $inputMessage.keydown(function (e) {
-  if (e.keyCode == 13)
-  {
+  if (e.keyCode == 13){
     sendMessage()
   }
 });
 
-
-// Click events
-// Focus input when clicking anywhere on login page
-$loginPage.click(function () {
-  $currentInput.focus();
-});
-
-// Focus input when clicking on the message input's border
-$inputMessage.click(function () {
-  $inputMessage.focus();
-});
