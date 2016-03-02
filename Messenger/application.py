@@ -172,18 +172,26 @@ def send_message():
     s.close()
     return json.dumps({}, 200, {'ContentType':'application/json'})
 
-@application.route('/get_messages')
+@application.route('/get_messages', methods=['POST'])
 def get_message():
+
+    other_user = request.values.get('user_id')
+
+    print(other_user)
+
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
-    result_proxy = s.execute('SELECT * FROM users RIGHT JOIN messages ON users.id = messages.user_id ORDER BY messages.time_sent DESC')
+    
+    result_proxy = s.execute('SELECT * from messages where user_id = %s AND to_group_id IS NULL' % other_user)
     s.close()
     results = result_proxy.fetchall()
     out = []
+    print(results)
     for result in results:
-        message_id = result[4]
-        name = result[1]
-        message = result[7]
+        print(result)
+        message_id = result[0]
+        name = other_user
+        message = result[3]
         out.append((message_id, name, message))
     return json.dumps(out)
 
@@ -205,6 +213,18 @@ def get_users():
 @application.route('/logout')
 def logout():
     flask_login.logout_user()
+    return redirect("login", code=302)
+
+@application.route('/delete_account')
+def delete_account():
+    Session = scoped_session(sessionmaker(bind=engine))
+    uid_to_delete = current_user.id
+    flask_login.logout_user()
+    s = Session()
+    result_proxy = s.execute('DELETE FROM users WHERE id='+ uid_to_delete)
+    s.commit()
+    s.close()
+
     return redirect("login", code=302)
 
 @application.route('/create_group', methods=['POST', 'GET'])

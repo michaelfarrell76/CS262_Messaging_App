@@ -341,10 +341,13 @@ ul {
   color: white;
 }
 
-.list-users {
+.singleMultiple {
+  width: 100%;
+}
+/*.list-users {
    height: 100px;
 overflow: scroll;
-}
+}*/
 
 .list-groups {
 

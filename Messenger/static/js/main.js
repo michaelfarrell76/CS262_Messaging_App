@@ -30,6 +30,7 @@ var lastTypingTime;
 var $currentInput = $usernameInput.focus();
 
 username = 'Kevin'
+currently_selected = null;
 $loginPage.fadeOut();
 $chatPage.show();
 $loginPage.off('click');
@@ -68,8 +69,7 @@ function sendMessage () {
 }
 
 function updateChat() {
-  data = {format:'json'}
-  url = 'get_messages'
+  
   success = function(messages) {
     //console.log(messages)
     var messages_len = messages.length
@@ -98,12 +98,19 @@ function updateChat() {
       }
     }
   }
-  $.ajax({
-  dataType: "json",
-  url: url,
-  data: data,
-  success: success
-});
+  if (currently_selected){
+    data = {user_id: currently_selected}
+
+    url = 'get_messages'
+    // $.post(url, data)
+    $.ajax({
+      type: "POST",
+      dataType: "json",
+      url: url,
+      data: data,
+      success: success
+    });
+  }
 }
 
 function updateUsers(){
@@ -136,9 +143,11 @@ function updateUsers(){
         }
         console.log(users_out)
         users_out.reverse()
-        $userList.empty();
+        // $userList.empty();
+        // $("#user_select").empty()
         for (var j = 0; j < users_out.length; j++) {
-          addUsersToList(users_out[j])
+          var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
+          $("#user_select").append(option)
         }
       }
     }
@@ -314,9 +323,19 @@ window.setInterval(function(){
     };
 
 
- document.getElementById("delete_account").onclick = function () {
-       
-    };
+document.getElementById("delete_account").onclick = function () {
+  var r = window.confirm("Are you sure you want to delete your account? This cannot be undone");
+  if (r) {
+    location.href = "/delete_account"; 
+  }
+}
+
+$('#user_select').change(function(){ 
+
+  currently_selected = $(this).val();
+  alert(currently_selected);
+  });
+    
 
 $inputMessage.keydown(function (e) {
   if (e.keyCode == 13)
