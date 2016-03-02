@@ -101,12 +101,22 @@ function sendMessage () {
         }
          $.ajax({
           type: "POST",
-          dataType: "json",
-          url: 'send_message',
-          data: JSON.parse(data.encodeJSON()),
+          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
+          url: "send_message", 
+          data: {protoString: data.toBase64()}, 
+          success: success,
+          error: function(data){console.log('failure'); console.log(data)}
+        })
+
+
+        //  $.ajax({
+        //   type: "POST",
+        //   dataType: "json",
+        //   url: 'send_message',
+        //   data: JSON.parse(data.encodeJSON()),
          
-          success: success
-        });
+        //   success: success
+        // });
 
     // $.post("send_message", data.toArrayBuffer())
 

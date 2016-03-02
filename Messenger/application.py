@@ -175,43 +175,22 @@ def send_message():
     if USE_PROTOBUFF:
         print('a')
         MsgClient = message_pb2.MsgClient()
-        # print(request.args.get("responseType"))
-        # print(request.data)
-        # print(request.form)
-        # print(request.values)
-        # print(request.stream.read())
-        # print(request.get_data())
-        # print(request.data)
-        for item in request.form:
-            print(item)
-        print(request.data, 'data')
-        print(request.get_data(), 'getdata')
 
-        # return json.dumps({}, 403, {'ContentType':'application/json'})
+        result = base64.b64decode(request.form['protoString'])
+        MsgClient.ParseFromString(result)
+
+        message = MsgClient.message
+        other_id = MsgClient.other_uid
+        select_type = MsgClient.select_type
+        print(message)
+        print(other_id)
+        print(select_type)
+    else:
 
 
-        # MsgClient.ParseFromString(request.get_data())
-        # print(MsgClient.message ,'Message')
-        # print(MsgClient.SerializeToString() ,)
-
-        print(MsgClient.ParseFromString(request.get_data()))
-        print(MsgClient.message ,'Message')
-        # MsgClient.SerializeToString())
-
-        # return MsgClient.SerializeToString()
-
-        
-
-       
-
-
-        # message = None
-        # other_user = None
-        # select_type = None
-
-
-    other_id =  request.form['other_uid']
-    select_type =  request.form['select_type']
+        other_id =  request.form['other_uid']
+        select_type =  request.form['select_type']
+        message = request.form['message']
 
     if other_id == "null":
         #not doing this right
@@ -240,7 +219,7 @@ def send_message():
     group_id = result[0]
     group_name = result[1]
 
-    message = request.form['message']
+    
 
     pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
     query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \
