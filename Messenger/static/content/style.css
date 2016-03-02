@@ -375,3 +375,8 @@ ul {
   background: #343d46;
   height: 25px;
 }
+
+.center {
+    text-align: 45%;
+    padding: 50px;
+}

@@ -348,6 +348,7 @@ $("#delete_account").click(function() {
 $('#u_sel').change(function(){ 
   type_selected = 'user';
   chat_name = $('#u_sel option:selected').text();
+  $('.center').replaceWith("<div class='center'>" + chat_name  + "</div>");
   currently_selected = $(this).val();
   change_user = true;
    $('#g_sel option').removeAttr("selected");
@@ -357,6 +358,7 @@ $('#u_sel').change(function(){
 $('#g_sel').change(function(){ 
   type_selected = 'group';
   chat_name = $('#g_sel option:selected').text();
+  $('.center').replaceWith("<div class='center'>" + chat_name  + "</div>");
   currently_selected = $(this).val();
   change_user = true;
    $('#u_sel option').removeAttr("selected");
