@@ -226,12 +226,23 @@ def send_message():
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
+    if USE_PROTOBUFF:
+        PreMsgClient = message_pb2.PreMsgClient()
+
+        result = base64.b64decode(request.form['protoString'])
+        PreMsgClient.ParseFromString(result)
+
+        other_user = PreMsgClient.user_id
+        select_type = PreMsgClient.select_type
+
+    else:
+        other_user =  request.form['user_id']
+        select_type =  request.form['select_type']
+
     
-    other_user =  request.form['user_id']
-    select_type =  request.form['select_type']
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
-    out = []
+    
     if select_type == "user":
         user_ids = sorted([current_user.id, other_user])
         users_str = '"[' + ", ".join(user_ids) + ']"'
@@ -249,13 +260,30 @@ def get_message():
     s.close()
     results = result_proxy.fetchall()
    
+    if USE_PROTOBUFF:
+        msgBuf = []
+    else:
+        out = []
+
     for result in reversed(results):
         message_id = result[0]
         name = result[1]
         message = result[2]
-        out.append((message_id, name, message))
-
-    return json.dumps(out)
+        if USE_PROTOBUFF:
+                msgBuf.append(message_pb2.Msg(
+                    message = message,
+                    message_id = str(message_id),
+                    name = name
+                    ))
+        else:
+            out.append((message_id, name, message))
+            
+    if USE_PROTOBUFF:
+        PostMsgClient = message_pb2.PostMsgClient(messages = msgBuf)
+        return base64.b64encode(PostMsgClient.SerializeToString())
+  
+    else:
+        return json.dumps(out)
 
 @application.route('/get_users')
 def get_users():
@@ -264,14 +292,32 @@ def get_users():
     result = s.execute('SELECT * FROM users')
     s.close()
     results = result.fetchall()
-    out = []
+
+
+    if USE_PROTOBUFF:
+        usrUsrs = []
+    else:
+        out = []
+ 
+
     for result in results:
         user_id = result[0]
         name = result[1]
-        email = result[2]
         if user_id != int(current_user.id):
-            out.append((user_id, name, email))
-    return json.dumps(out)
+            if USE_PROTOBUFF:
+                usrUsrs.append(message_pb2.UsrClient(
+                    user_id = str(user_id),
+                    name = name
+                    ))
+            else:
+                out.append((user_id, name))
+            
+    if USE_PROTOBUFF:
+        UsrUsrs = message_pb2.UsrUsrs(usrs = usrUsrs)
+        return base64.b64encode(UsrUsrs.SerializeToString())
+  
+    else:
+        return json.dumps(out)
 
 @application.route('/logout')
 def logout():
@@ -348,15 +394,30 @@ def get_groups():
     result = s.execute('SELECT * FROM groups')
     s.close()
     results = result.fetchall()
-    out = []
+
+    if USE_PROTOBUFF:
+        grpUsrs = []
+    else:
+        out = []
     for result in results:
         group_id = result[0]
         group_name = result[1]
         user_ids = ast.literal_eval(result[2])
         if len(user_ids) > 2 and int(current_user.id) in user_ids:
-            out.append((group_id, group_name, user_ids))
-    print(json.dumps(out))
-    return json.dumps(out)
+            if USE_PROTOBUFF:
+                grpUsrs.append(message_pb2.GrpCreateClient(
+                    user_ids =result[2],
+                    group_name = group_name,
+                    group_id = str(group_id)
+                    ))
+            else:
+                out.append((group_id, group_name, user_ids))
+    if USE_PROTOBUFF:
+        GrpUsrs = message_pb2.GrpUsrs(grpClient = grpUsrs)
+        return base64.b64encode(GrpUsrs.SerializeToString())
+  
+    else:
+        return json.dumps(out)
 
 
 if __name__ == '__main__':

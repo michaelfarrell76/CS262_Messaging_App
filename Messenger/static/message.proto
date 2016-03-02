@@ -4,8 +4,36 @@ message MsgClient {
 	required string select_type = 3;
 };
 
+message Msg {
+	required string message = 1; 
+	required string message_id = 2;
+	required string name = 3;
+};
+
+message PreMsgClient {
+	required string user_id = 1; 
+	required string select_type = 2;
+};
+
+message PostMsgClient {
+	 repeated Msg messages = 1;
+};
+
+message UsrClient {
+	required string user_id = 1; 
+	required string name = 2;
+};
+
+message UsrUsrs {
+  repeated UsrClient usrs = 1;
+};
+
 message GrpCreateClient {
 	required string user_ids = 1; 
 	required string group_name = 2;
 	optional string group_id = 3;
+};
+
+message GrpUsrs {
+  repeated GrpCreateClient grpClient = 1;
 };

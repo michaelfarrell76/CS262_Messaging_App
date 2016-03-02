@@ -12,26 +12,23 @@ var COLORS = [
 // Initialize variables
 var $window = $(window);
 var $usernameInput = $('.usernameInput'); // Input for username
+var $currentInput = $usernameInput.focus();
 var $messages = $('.messages'); // Messages area
-var $messages_id = $('#messages_loc');
 var $inputMessage = $('.inputMessage'); // Input message input box
-var $registerButton = $('.register_button'); // Input message input box
-var $userList = $('.list-users');
 var $chatPage = $('.chat.page'); // The chatroom page
 
-var $currentInput = $usernameInput.focus();
-
 var delete_err_msg = "Are you sure you want to delete your account?\n\n This cannot be undone"
+
+//intervals for updating chat and users
 var chat_int = 1000;
 var user_int = 5000;
 
 // Prompt for setting a username
 var username;
 var lastTypingTime;
-var currently_selected = null;
-var type_selected = null;
+var currently_selected = null; //id currently interacting with
+var type_selected = null; 
 var chat_name = null;
-
 var connected = false;
 var typing = false;
 var change_user = false;
@@ -45,12 +42,19 @@ protojson.config(['$interpolateProvider', function($interpolateProvider) {
   $interpolateProvider.endSymbol(']}');
 }]);
 var ProtoBuf = dcodeIO.ProtoBuf;
-var MsgClient, GrpCreateClient;
+var MsgClient, GrpCreateClient, GrpUsrs, UsrClient, UsrUsrs, PreMsgClient, PostMsgClient, Msg;
 
 
 builder = ProtoBuf.loadProtoFile("/static/message.proto");
 MsgClient = builder.build("MsgClient");
 GrpCreateClient = builder.build("GrpCreateClient");
+GrpUsrs = builder.build("GrpUsrs");
+UsrClient = builder.build("UsrClient");
+UsrUsrs = builder.build("UsrUsrs");
+PreMsgClient = builder.build("PreMsgClient");
+PostMsgClient  = builder.build("PostMsgClient");
+Msg = builder.build("Msg");
+
 
 $chatPage.show();
 $currentInput = $inputMessage.focus();
@@ -86,7 +90,7 @@ function sendMessage () {
           other_uid: cleanInput(currently_selected),
           select_type:type_selected
         });
-    
+        console.log(data.encode())
         success = function() {
           console.log("successful return")
         }
@@ -109,63 +113,128 @@ function sendMessage () {
 
 //Update the chat screen
 function updateChat() {
-  
-  success = function(messages) {
-    var messages_len = messages.length
-    if(messages == ''){
-      newest_message_id = 0
-    }
-    else{
-      newest_message_id = messages[0][0]
-    }
-   
-    if(change_user){
-      $messages.empty();
-      global_latest_message_id = 0;
-    }
-    if (newest_message_id > global_latest_message_id) {
-      last_message_id = global_latest_message_id
-      global_latest_message_id = newest_message_id
-      messages_out = []
+  if (!useProto){
+    success = function(messages) {
+      var messages_len = messages.length
+      if(messages == ''){
+        newest_message_id = 0
+      }
+      else{
+        newest_message_id = messages[0][0]
+      }
+     
+      if(change_user){
+        $messages.empty();
+        global_latest_message_id = 0;
+      }
+      if (newest_message_id > global_latest_message_id) {
+        last_message_id = global_latest_message_id
+        global_latest_message_id = newest_message_id
+        messages_out = []
 
-      for (var i = 0; i < messages_len; i++) { 
-        message = messages[i]
-        if ( message[0] > last_message_id) {
-          message_data = {}
-          message_data.latest_id = message[0]
-          message_data.username = message[1]
-          message_data.message = message[2] 
-          messages_out.push(message_data)
+        for (var i = 0; i < messages_len; i++) { 
+          message = messages[i]
+          if ( message[0] > last_message_id) {
+            message_data = {}
+            message_data.latest_id = message[0]
+            message_data.username = message[1]
+            message_data.message = message[2] 
+            messages_out.push(message_data)
+          }
+          else {
+            break
+          }
         }
-        else {
-          break
+
+        messages_out.reverse()
+        for (var j = 0; j < messages_out.length; j++) {
+          addChatMessage(messages_out[j])
         }
       }
-
-      messages_out.reverse()
-      for (var j = 0; j < messages_out.length; j++) {
-        addChatMessage(messages_out[j])
+      if(change_user){
+        change_user = false;
       }
     }
-    if(change_user){
-      change_user = false;
+    if (currently_selected){
+      data = {user_id: cleanInput(currently_selected),
+              select_type: type_selected}
+
+      $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: 'get_messages',
+        data: data,
+        success: success
+      });
     }
   }
-  if (currently_selected){
-    data = {user_id: cleanInput(currently_selected),
-            select_type: type_selected}
+  else{
+    success = function(messages) {
+      var msg = PostMsgClient.decode(messages);
+       console.log(msg)
+       messages = msg.messages;
+      var messages_len = messages.length
+      if(messages == ''){
+        newest_message_id = 0
+      }
+      else{
+        newest_message_id = messages[0]['message_id']
+      }
+     
+      if(change_user){
+        $messages.empty();
+        global_latest_message_id = 0;
+      }
+      if (newest_message_id > global_latest_message_id) {
+        last_message_id = global_latest_message_id
+        global_latest_message_id = newest_message_id
+        messages_out = []
 
-    $.ajax({
-      type: "POST",
-      dataType: "json",
-      url: 'get_messages',
-      data: data,
-      success: success
-    });
+        for (var i = 0; i < messages_len; i++) { 
+          message = messages[i]
+          if ( message['message_id'] > last_message_id) {
+            message_data = {}
+            message_data.latest_id = message['message_id']
+            message_data.username = message['name']
+            message_data.message = message['message'] 
+            messages_out.push(message_data)
+          }
+          else {
+            break
+          }
+        }
+
+        messages_out.reverse()
+        for (var j = 0; j < messages_out.length; j++) {
+          addChatMessage(messages_out[j])
+        }
+      }
+      if(change_user){
+        change_user = false;
+      }
+    }
+    if (currently_selected){
+        data = new PreMsgClient({
+          user_id: cleanInput(currently_selected),
+          select_type: type_selected
+        });
+        
+         $.ajax({
+          type: "POST",
+          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
+          url: "get_messages", 
+          responseType: 'arraybuffer',
+          data: {protoString: data.toBase64()}, 
+          success: success,
+          error: function(data){console.log('failure'); console.log('fed')}
+        })
+
+    }
   }
 }
 
 function updateUsers(){
+  if (!useProto){
     success = function(users) {
 
       var num_users = users.length
@@ -209,11 +278,58 @@ function updateUsers(){
       data: data,
       success: success
     });
+  }
+  else{
+    success = function(users) {
+         var msg = UsrUsrs.decode(users);
+         console.log(msg)
+         users = msg.usrs;
+     
+        
+          var num_users = users.length
+      
+      if (num_users > global_user_count) {
+        console.log(global_user_count)
+        global_user_count = num_users
+        latest_user_id = users[0]['user_id']
+        users_out = []
+        console.log(num_users)
+        for (var i = 0; i < num_users; i++) { 
+          console.log(latest_user_id)
+          user = users[i]
+          if (user['user_id'] >= latest_user_id) {
+            user_data = {}
+            user_data.user_id = user['user_id']
+            user_data.name = user['name']
+            users_out.push(user_data)
+          }
+          else {
+            break
+          }
+        }
+        console.log(users_out)
+        users_out.reverse()
+        $('.user_select').empty()
+        for (var j = 0; j < users_out.length; j++) {
+          var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
+          $(".user_select").append(option)
+        }
+      $('.ui.dropdown').dropdown({allowAdditions: false});  
+      }
+
+       }  
+      a = $.ajax({
+        url: "get_users",
+        success: success,
+        responseType: 'arraybuffer',
+        error: function(data){console.log('fed')}
+      });
+  }
 }
 
 function updateGroups(){
-    // if (!useProto){
-    if (true){
+    if (!useProto){
+
       success = function(groups) {
         var num_groups = groups.length
         
@@ -252,15 +368,53 @@ function updateGroups(){
         error: function(data){console.log(data)}
       });
     }
-     // success = function(groups) {
-     //   var msg = AddressBook.decode(data);
-     // }
+    else{
+       success = function(groups) {
+         var msg = GrpUsrs.decode(groups);
+         console.log(msg)
+         groups = msg.grpClient;
+         console.log(groups)
+         console.log(groups.length)
 
-     //  a = $.ajax({
-     //    url: "get_groups",
-     //    success: success,
-     //    error: function(data){console.log(data)}
-     //  });
+         var num_groups = groups.length
+
+         console.log()
+        
+        if (num_groups > global_groups_count) {
+          global_groups_count = num_groups
+          latest_groups_id = groups[0]['group_id']
+          groups_out = []
+          for (var i = 0; i < num_groups; i++) { 
+            group = groups[i]
+            if (group['group_id'] >= latest_groups_id) {
+              groups_data = {}
+              groups_data.group_id = group['group_id']
+              groups_data.group_name = group['group_name']
+              groups_data.user_ids = group['user_ids']
+              groups_out.push(groups_data)
+            }
+            else {
+              break
+            }
+          }
+          groups_out.reverse()
+          $('.group_select').empty()
+          for (var j = 0; j < groups_out.length; j++) {
+            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
+            $(".group_select").append(option)
+          }
+        }
+
+       }  
+      a = $.ajax({
+        url: "get_groups",
+        success: success,
+        responseType: 'arraybuffer',
+        error: function(data){console.log('fed')}
+      });
+    }
+    
+
 
 
 }

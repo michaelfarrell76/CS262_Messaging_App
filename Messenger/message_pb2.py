@@ -18,7 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='',
-  serialized_pb=_b('\n\rmessage.proto\"D\n\tMsgClient\x12\x0f\n\x07message\x18\x01 \x02(\t\x12\x11\n\tother_uid\x18\x02 \x02(\t\x12\x13\n\x0bselect_type\x18\x03 \x02(\t\"I\n\x0fGrpCreateClient\x12\x10\n\x08user_ids\x18\x01 \x02(\t\x12\x12\n\ngroup_name\x18\x02 \x02(\t\x12\x10\n\x08group_id\x18\x03 \x01(\t')
+  serialized_pb=_b('\n\rmessage.proto\"D\n\tMsgClient\x12\x0f\n\x07message\x18\x01 \x02(\t\x12\x11\n\tother_uid\x18\x02 \x02(\t\x12\x13\n\x0bselect_type\x18\x03 \x02(\t\"8\n\x03Msg\x12\x0f\n\x07message\x18\x01 \x02(\t\x12\x12\n\nmessage_id\x18\x02 \x02(\t\x12\x0c\n\x04name\x18\x03 \x02(\t\"4\n\x0cPreMsgClient\x12\x0f\n\x07user_id\x18\x01 \x02(\t\x12\x13\n\x0bselect_type\x18\x02 \x02(\t\"\'\n\rPostMsgClient\x12\x16\n\x08messages\x18\x01 \x03(\x0b\x32\x04.Msg\"*\n\tUsrClient\x12\x0f\n\x07user_id\x18\x01 \x02(\t\x12\x0c\n\x04name\x18\x02 \x02(\t\"#\n\x07UsrUsrs\x12\x18\n\x04usrs\x18\x01 \x03(\x0b\x32\n.UsrClient\"I\n\x0fGrpCreateClient\x12\x10\n\x08user_ids\x18\x01 \x02(\t\x12\x12\n\ngroup_name\x18\x02 \x02(\t\x12\x10\n\x08group_id\x18\x03 \x01(\t\".\n\x07GrpUsrs\x12#\n\tgrpClient\x18\x01 \x03(\x0b\x32\x10.GrpCreateClient')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -69,6 +69,184 @@ _MSGCLIENT = _descriptor.Descriptor(
 )
 
 
+_MSG = _descriptor.Descriptor(
+  name='Msg',
+  full_name='Msg',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='message', full_name='Msg.message', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='message_id', full_name='Msg.message_id', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='Msg.name', index=2,
+      number=3, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=87,
+  serialized_end=143,
+)
+
+
+_PREMSGCLIENT = _descriptor.Descriptor(
+  name='PreMsgClient',
+  full_name='PreMsgClient',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='PreMsgClient.user_id', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='select_type', full_name='PreMsgClient.select_type', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=145,
+  serialized_end=197,
+)
+
+
+_POSTMSGCLIENT = _descriptor.Descriptor(
+  name='PostMsgClient',
+  full_name='PostMsgClient',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='messages', full_name='PostMsgClient.messages', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=199,
+  serialized_end=238,
+)
+
+
+_USRCLIENT = _descriptor.Descriptor(
+  name='UsrClient',
+  full_name='UsrClient',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_id', full_name='UsrClient.user_id', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='name', full_name='UsrClient.name', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=240,
+  serialized_end=282,
+)
+
+
+_USRUSRS = _descriptor.Descriptor(
+  name='UsrUsrs',
+  full_name='UsrUsrs',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='usrs', full_name='UsrUsrs.usrs', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=284,
+  serialized_end=319,
+)
+
+
 _GRPCREATECLIENT = _descriptor.Descriptor(
   name='GrpCreateClient',
   full_name='GrpCreateClient',
@@ -108,12 +286,51 @@ _GRPCREATECLIENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=87,
-  serialized_end=160,
+  serialized_start=321,
+  serialized_end=394,
 )
 
+
+_GRPUSRS = _descriptor.Descriptor(
+  name='GrpUsrs',
+  full_name='GrpUsrs',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='grpClient', full_name='GrpUsrs.grpClient', index=0,
+      number=1, type=11, cpp_type=10, label=3,
+      has_default_value=False, default_value=[],
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=396,
+  serialized_end=442,
+)
+
+_POSTMSGCLIENT.fields_by_name['messages'].message_type = _MSG
+_USRUSRS.fields_by_name['usrs'].message_type = _USRCLIENT
+_GRPUSRS.fields_by_name['grpClient'].message_type = _GRPCREATECLIENT
 DESCRIPTOR.message_types_by_name['MsgClient'] = _MSGCLIENT
+DESCRIPTOR.message_types_by_name['Msg'] = _MSG
+DESCRIPTOR.message_types_by_name['PreMsgClient'] = _PREMSGCLIENT
+DESCRIPTOR.message_types_by_name['PostMsgClient'] = _POSTMSGCLIENT
+DESCRIPTOR.message_types_by_name['UsrClient'] = _USRCLIENT
+DESCRIPTOR.message_types_by_name['UsrUsrs'] = _USRUSRS
 DESCRIPTOR.message_types_by_name['GrpCreateClient'] = _GRPCREATECLIENT
+DESCRIPTOR.message_types_by_name['GrpUsrs'] = _GRPUSRS
 
 MsgClient = _reflection.GeneratedProtocolMessageType('MsgClient', (_message.Message,), dict(
   DESCRIPTOR = _MSGCLIENT,
@@ -122,12 +339,54 @@ MsgClient = _reflection.GeneratedProtocolMessageType('MsgClient', (_message.Mess
   ))
 _sym_db.RegisterMessage(MsgClient)
 
+Msg = _reflection.GeneratedProtocolMessageType('Msg', (_message.Message,), dict(
+  DESCRIPTOR = _MSG,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:Msg)
+  ))
+_sym_db.RegisterMessage(Msg)
+
+PreMsgClient = _reflection.GeneratedProtocolMessageType('PreMsgClient', (_message.Message,), dict(
+  DESCRIPTOR = _PREMSGCLIENT,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:PreMsgClient)
+  ))
+_sym_db.RegisterMessage(PreMsgClient)
+
+PostMsgClient = _reflection.GeneratedProtocolMessageType('PostMsgClient', (_message.Message,), dict(
+  DESCRIPTOR = _POSTMSGCLIENT,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:PostMsgClient)
+  ))
+_sym_db.RegisterMessage(PostMsgClient)
+
+UsrClient = _reflection.GeneratedProtocolMessageType('UsrClient', (_message.Message,), dict(
+  DESCRIPTOR = _USRCLIENT,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:UsrClient)
+  ))
+_sym_db.RegisterMessage(UsrClient)
+
+UsrUsrs = _reflection.GeneratedProtocolMessageType('UsrUsrs', (_message.Message,), dict(
+  DESCRIPTOR = _USRUSRS,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:UsrUsrs)
+  ))
+_sym_db.RegisterMessage(UsrUsrs)
+
 GrpCreateClient = _reflection.GeneratedProtocolMessageType('GrpCreateClient', (_message.Message,), dict(
   DESCRIPTOR = _GRPCREATECLIENT,
   __module__ = 'message_pb2'
   # @@protoc_insertion_point(class_scope:GrpCreateClient)
   ))
 _sym_db.RegisterMessage(GrpCreateClient)
+
+GrpUsrs = _reflection.GeneratedProtocolMessageType('GrpUsrs', (_message.Message,), dict(
+  DESCRIPTOR = _GRPUSRS,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:GrpUsrs)
+  ))
+_sym_db.RegisterMessage(GrpUsrs)
 
 
 # @@protoc_insertion_point(module_scope)
