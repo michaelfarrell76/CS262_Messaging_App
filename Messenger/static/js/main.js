@@ -45,10 +45,12 @@ protojson.config(['$interpolateProvider', function($interpolateProvider) {
   $interpolateProvider.endSymbol(']}');
 }]);
 var ProtoBuf = dcodeIO.ProtoBuf;
-var MsgClient;
+var MsgClient, GrpCreateClient;
+
 
 builder = ProtoBuf.loadProtoFile("/static/message.proto");
 MsgClient = builder.build("MsgClient");
+GrpCreateClient = builder.build("GrpCreateClient");
 
 $chatPage.show();
 $currentInput = $inputMessage.focus();
@@ -84,20 +86,9 @@ function sendMessage () {
           other_uid: cleanInput(currently_selected),
           select_type:type_selected
         });
-        var byteBuffer = data.encode();
-        console.log('1');
-        console.log(data.toArrayBuffer());
-         console.log('2');
-        console.log(MsgClient.decode(data.toArrayBuffer()))
-        // console.log(data.encodeToJSON());
-
-        console.log("posting data")
-        console.log(data.toString())
-        console.log(JSON.parse(data.encodeJSON()))
-       
+    
         success = function() {
           console.log("successful return")
-     
         }
          $.ajax({
           type: "POST",
@@ -107,35 +98,6 @@ function sendMessage () {
           success: success,
           error: function(data){console.log('failure'); console.log(data)}
         })
-
-
-        //  $.ajax({
-        //   type: "POST",
-        //   dataType: "json",
-        //   url: 'send_message',
-        //   data: JSON.parse(data.encodeJSON()),
-         
-        //   success: success
-        // });
-
-    // $.post("send_message", data.toArrayBuffer())
-
-      //    $.ajax({
-      //     type: "POST",
-      //     dataType: 'arraybuffer',
-      //     url: 'send_message',
-      //      transformRequest: function(r) { return r;},
-      // data: data.toArrayBuffer(),
-      // headers: {
-      //   'Content-Type': 'binary/octet-stream'
-      // },
-         
-      //     success: success
-      //   });
-
-     
-
-        console.log("post returns")
       }
 
     }
@@ -250,44 +212,57 @@ function updateUsers(){
 }
 
 function updateGroups(){
-    success = function(groups) {
-      var num_groups = groups.length
-      
-      if (num_groups > global_groups_count) {
-        global_groups_count = num_groups
-        latest_groups_id = groups[0][0]
-        groups_out = []
-        for (var i = 0; i < num_groups; i++) { 
-          group = groups[i]
-          if (group[0] >= latest_groups_id) {
-            groups_data = {}
-            groups_data.group_id = group[0]
-            console.log(group[2])
-            groups_data.group_name = group[1]
-            groups_data.user_ids = group[2] 
-            groups_out.push(groups_data)
+    // if (!useProto){
+    if (true){
+      success = function(groups) {
+        var num_groups = groups.length
+        
+        if (num_groups > global_groups_count) {
+          global_groups_count = num_groups
+          latest_groups_id = groups[0][0]
+          groups_out = []
+          for (var i = 0; i < num_groups; i++) { 
+            group = groups[i]
+            if (group[0] >= latest_groups_id) {
+              groups_data = {}
+              groups_data.group_id = group[0]
+              console.log(group[2])
+              groups_data.group_name = group[1]
+              groups_data.user_ids = group[2] 
+              groups_out.push(groups_data)
+            }
+            else {
+              break
+            }
           }
-          else {
-            break
+          groups_out.reverse()
+          $('.group_select').empty()
+          for (var j = 0; j < groups_out.length; j++) {
+            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
+            $(".group_select").append(option)
           }
-        }
-        groups_out.reverse()
-        $('.group_select').empty()
-        for (var j = 0; j < groups_out.length; j++) {
-          var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
-          $(".group_select").append(option)
         }
       }
-    }
-    data = {format:'json'}
 
-    a = $.ajax({
-      dataType: "json",
-      url: "get_groups",
-      data: data,
-      success: success,
-      error: function(data){console.log(data)}
-    });
+      a = $.ajax({
+        dataType: "json",
+        url: "get_groups",
+        data: {format:'json'},
+        success: success,
+        error: function(data){console.log(data)}
+      });
+    }
+     // success = function(groups) {
+     //   var msg = AddressBook.decode(data);
+     // }
+
+     //  a = $.ajax({
+     //    url: "get_groups",
+     //    success: success,
+     //    error: function(data){console.log(data)}
+     //  });
+
+
 }
 
 
@@ -455,12 +430,31 @@ $('.modalCreateButton').click(function (){
   $("#group_select>option:selected").removeAttr("selected");
   $('.ui.dropdown').dropdown('restore defaults'); 
   $('#group_name').val('')
-  $.ajax({
-    type: "POST",
-    dataType: "json",
-    url: 'create_group',
-    data: {user_ids: values, group_name:name},
-    success: function(data) {console.log('Success')}
-   });
+  data = {user_ids: values, group_name:name}
+  if (!useProto){
+      $.ajax({
+        type: "POST",
+        dataType: "json",
+        url: 'create_group',
+        data: data,
+        success: function(data) {console.log('Success')}
+       });
+
+      }else{
+        console.log("using proto")
+        data_client = new GrpCreateClient(data);
+    
+        success = function() {
+          console.log("successful return")
+        }
+         $.ajax({
+          type: "POST",
+          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
+          url: "create_group", 
+          data: {protoString: data_client.toBase64()}, 
+          success: function(data) {console.log('Success')},
+          error: function(data){console.log('failure'); console.log(data_client)}
+        })
+      }
 })
 

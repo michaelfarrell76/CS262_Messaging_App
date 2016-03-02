@@ -173,7 +173,6 @@ def register():
 def send_message():
 
     if USE_PROTOBUFF:
-        print('a')
         MsgClient = message_pb2.MsgClient()
 
         result = base64.b64decode(request.form['protoString'])
@@ -182,12 +181,8 @@ def send_message():
         message = MsgClient.message
         other_id = MsgClient.other_uid
         select_type = MsgClient.select_type
-        print(message)
-        print(other_id)
-        print(select_type)
+
     else:
-
-
         other_id =  request.form['other_uid']
         select_type =  request.form['select_type']
         message = request.form['message']
@@ -298,8 +293,22 @@ def delete_account():
 @application.route('/create_group', methods=['POST', 'GET'])
 def create_group():
     if request.method == 'POST':
-        user_ids = request.form['user_ids']
-        name = request.form['group_name']
+
+        if USE_PROTOBUFF:
+            GrpCreateClient = message_pb2.GrpCreateClient()
+
+            result = base64.b64decode(request.form['protoString'])
+            GrpCreateClient.ParseFromString(result)
+
+            user_ids = GrpCreateClient.user_ids
+            name = GrpCreateClient.group_name
+
+        else:
+            user_ids = request.form['user_ids']
+            name = request.form['group_name']
+        
+       
+       
         user_ids = user_ids.split(',')
         user_ids = [int(user_id) for user_id in user_ids]
         user_ids.append(int(current_user.id))
@@ -346,6 +355,7 @@ def get_groups():
         user_ids = ast.literal_eval(result[2])
         if len(user_ids) > 2 and int(current_user.id) in user_ids:
             out.append((group_id, group_name, user_ids))
+    print(json.dumps(out))
     return json.dumps(out)
 
 

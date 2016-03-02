@@ -3,3 +3,9 @@ message MsgClient {
 	required string other_uid = 2;
 	required string select_type = 3;
 };
+
+message GrpCreateClient {
+	required string user_ids = 1; 
+	required string group_name = 2;
+	optional string group_id = 3;
+};

@@ -18,7 +18,7 @@ _sym_db = _symbol_database.Default()
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
   package='',
-  serialized_pb=_b('\n\rmessage.proto\"D\n\tMsgClient\x12\x0f\n\x07message\x18\x01 \x02(\t\x12\x11\n\tother_uid\x18\x02 \x02(\t\x12\x13\n\x0bselect_type\x18\x03 \x02(\t')
+  serialized_pb=_b('\n\rmessage.proto\"D\n\tMsgClient\x12\x0f\n\x07message\x18\x01 \x02(\t\x12\x11\n\tother_uid\x18\x02 \x02(\t\x12\x13\n\x0bselect_type\x18\x03 \x02(\t\"I\n\x0fGrpCreateClient\x12\x10\n\x08user_ids\x18\x01 \x02(\t\x12\x12\n\ngroup_name\x18\x02 \x02(\t\x12\x10\n\x08group_id\x18\x03 \x01(\t')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
@@ -68,7 +68,52 @@ _MSGCLIENT = _descriptor.Descriptor(
   serialized_end=85,
 )
 
+
+_GRPCREATECLIENT = _descriptor.Descriptor(
+  name='GrpCreateClient',
+  full_name='GrpCreateClient',
+  filename=None,
+  file=DESCRIPTOR,
+  containing_type=None,
+  fields=[
+    _descriptor.FieldDescriptor(
+      name='user_ids', full_name='GrpCreateClient.user_ids', index=0,
+      number=1, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group_name', full_name='GrpCreateClient.group_name', index=1,
+      number=2, type=9, cpp_type=9, label=2,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+    _descriptor.FieldDescriptor(
+      name='group_id', full_name='GrpCreateClient.group_id', index=2,
+      number=3, type=9, cpp_type=9, label=1,
+      has_default_value=False, default_value=_b("").decode('utf-8'),
+      message_type=None, enum_type=None, containing_type=None,
+      is_extension=False, extension_scope=None,
+      options=None),
+  ],
+  extensions=[
+  ],
+  nested_types=[],
+  enum_types=[
+  ],
+  options=None,
+  is_extendable=False,
+  extension_ranges=[],
+  oneofs=[
+  ],
+  serialized_start=87,
+  serialized_end=160,
+)
+
 DESCRIPTOR.message_types_by_name['MsgClient'] = _MSGCLIENT
+DESCRIPTOR.message_types_by_name['GrpCreateClient'] = _GRPCREATECLIENT
 
 MsgClient = _reflection.GeneratedProtocolMessageType('MsgClient', (_message.Message,), dict(
   DESCRIPTOR = _MSGCLIENT,
@@ -76,6 +121,13 @@ MsgClient = _reflection.GeneratedProtocolMessageType('MsgClient', (_message.Mess
   # @@protoc_insertion_point(class_scope:MsgClient)
   ))
 _sym_db.RegisterMessage(MsgClient)
+
+GrpCreateClient = _reflection.GeneratedProtocolMessageType('GrpCreateClient', (_message.Message,), dict(
+  DESCRIPTOR = _GRPCREATECLIENT,
+  __module__ = 'message_pb2'
+  # @@protoc_insertion_point(class_scope:GrpCreateClient)
+  ))
+_sym_db.RegisterMessage(GrpCreateClient)
 
 
 # @@protoc_insertion_point(module_scope)
