@@ -15,7 +15,6 @@ var $usernameInput = $('.usernameInput'); // Input for username
 var $messages = $('.messages'); // Messages area
 var $messages_id = $('#messages_loc');
 var $inputMessage = $('.inputMessage'); // Input message input box
-var $loginButton = $('.login_button'); // Input message input box
 var $registerButton = $('.register_button'); // Input message input box
 var $userList = $('.list-users');
 var $chatPage = $('.chat.page'); // The chatroom page
