@@ -36,27 +36,31 @@ var connected = false;
 var typing = false;
 var change_user = false;
 
-var useProto = false;
+var useProto = true;
 
 // Some Proto Code
-
+var protojson = angular.module('protojson', []);
+protojson.config(['$interpolateProvider', function($interpolateProvider) {
+  $interpolateProvider.startSymbol('{[');
+  $interpolateProvider.endSymbol(']}');
+}]);
 var ProtoBuf = dcodeIO.ProtoBuf;
-console.log(ProtoBuf)
+var MsgClient;
 
-var builder = ProtoBuf.loadProtoFile("/static/message.proto");
-var MsgClient = builder.build("MsgClient");
+builder = ProtoBuf.loadProtoFile("/static/message.proto");
+MsgClient = builder.build("MsgClient");
 
 $chatPage.show();
 $currentInput = $inputMessage.focus();
 
 // Sets the client's username
 function setUsername () {
-  username = cleanInput($usernameInput.val().trim());
-  // If the username is valid
-  if (username) {
-    $chatPage.show();
-    $currentInput = $inputMessage.focus();
-  }
+  // username = cleanInput($usernameInput.val().trim());
+  // // If the username is valid
+  // if (username) {
+  //   $chatPage.show();
+  //   $currentInput = $inputMessage.focus();
+  // }
 
 }
 
@@ -78,37 +82,50 @@ function sendMessage () {
         data = new MsgClient({
           message: message,
           other_uid: cleanInput(currently_selected),
-          select_type:'user'
+          select_type:type_selected
+        });
+        var byteBuffer = data.encode();
+        console.log('1');
+        console.log(data.toArrayBuffer());
+         console.log('2');
+        console.log(MsgClient.decode(data.toArrayBuffer()))
+        // console.log(data.encodeToJSON());
+
+        console.log("posting data")
+        console.log(data.toString())
+        console.log(JSON.parse(data.encodeJSON()))
+       
+        success = function() {
+          console.log("successful return")
+     
+        }
+         $.ajax({
+          type: "POST",
+          dataType: "json",
+          url: 'send_message',
+          data: JSON.parse(data.encodeJSON()),
+         
+          success: success
         });
 
-        // var req = {
-        //   method: 'POST',
-        //   url: '/send_message',
-        //   responseType: 'arraybuffer',
-        //   transformRequest: function(r) { return r;},
-        //   data: data.toArrayBuffer(),
-        //   headers: {
-        //     'Content-Type': 'binary/octet-stream'
-        //   }
-        // };
+    // $.post("send_message", data.toArrayBuffer())
 
-        // success = function(data){
-        //   console.log("sent request");
-        //   console.log(data);
-        // }
+      //    $.ajax({
+      //     type: "POST",
+      //     dataType: 'arraybuffer',
+      //     url: 'send_message',
+      //      transformRequest: function(r) { return r;},
+      // data: data.toArrayBuffer(),
+      // headers: {
+      //   'Content-Type': 'binary/octet-stream'
+      // },
+         
+      //     success: success
+      //   });
 
-        console.log(data.toBase64());
+     
 
-        // $.ajax({
-        //   type: "POST",
-        //   beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
-        //   url: "send_message", 
-        //   data: {protoString: data.toBase64()}, 
-        //   success: success,
-        //   error: function(data){console.log('failure'); console.log(data)}
-        // })
-        console.log("posting data")
-        $.post("send_message", data.toArrayBuffer())
+        console.log("post returns")
       }
 
     }

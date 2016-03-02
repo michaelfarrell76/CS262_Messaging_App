@@ -28,7 +28,7 @@ from protobuf_to_dict import protobuf_to_dict
 import base64
 
 
-USE_PROTOBUFF = False
+USE_PROTOBUFF = True
 
 # Default config vals
 FLASK_DEBUG = 'false' if os.environ.get('FLASK_DEBUG') is None else os.environ.get('FLASK_DEBUG')
@@ -173,19 +173,41 @@ def register():
 def send_message():
 
     if USE_PROTOBUFF:
-        #useProto = request.headers['Accept'] == "application/x-protobuf"
-        #protoString = request.form["protoString"]
-        print request.stream.read()
-        print request.get_data()
-        print request.data
+        print('a')
         MsgClient = message_pb2.MsgClient()
-        MsgClient.ParseFromString(request.data)
-        print MsgClient, "MsgClient"
-        dictProtoBuff = protobuf_to_dict(MsgClient)
-        print dictProtoBuff, "dictProtoBuff"
-        message = None
-        other_user = None
-        select_type = None
+        # print(request.args.get("responseType"))
+        # print(request.data)
+        # print(request.form)
+        # print(request.values)
+        # print(request.stream.read())
+        # print(request.get_data())
+        # print(request.data)
+        for item in request.form:
+            print(item)
+        print(request.data, 'data')
+        print(request.get_data(), 'getdata')
+
+        # return json.dumps({}, 403, {'ContentType':'application/json'})
+
+
+        # MsgClient.ParseFromString(request.get_data())
+        # print(MsgClient.message ,'Message')
+        # print(MsgClient.SerializeToString() ,)
+
+        print(MsgClient.ParseFromString(request.get_data()))
+        print(MsgClient.message ,'Message')
+        # MsgClient.SerializeToString())
+
+        # return MsgClient.SerializeToString()
+
+        
+
+       
+
+
+        # message = None
+        # other_user = None
+        # select_type = None
 
 
     other_id =  request.form['other_uid']
@@ -230,7 +252,7 @@ def send_message():
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
-
+    
     other_user =  request.form['user_id']
     select_type =  request.form['select_type']
     Session = scoped_session(sessionmaker(bind=engine))
