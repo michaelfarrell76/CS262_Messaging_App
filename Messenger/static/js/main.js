@@ -75,14 +75,20 @@ function updateChat() {
     //console.log(messages)
     var messages_len = messages.length
     newest_message_id = messages[0][0]
+    if(change_user){
+      global_latest_message_id = -1;
+
+      $messageDiv.clear();
+      
+    }
     if (newest_message_id > global_latest_message_id) {
       last_message_id = global_latest_message_id
       global_latest_message_id = newest_message_id
       messages_out = []
-      
+
       for (var i = 0; i < messages_len; i++) { 
         message = messages[i]
-        if (change_user || message[0] > last_message_id) {
+        if ( message[0] > last_message_id) {
           message_data = {}
           message_data.latest_id = message[0]
           message_data.username = message[1]
@@ -95,9 +101,7 @@ function updateChat() {
       }
 
       messages_out.reverse()
-      if(change_user){
-        $messageDiv.clear();
-      }
+      
       for (var j = 0; j < messages_out.length; j++) {
         addChatMessage(messages_out[j])
       }
