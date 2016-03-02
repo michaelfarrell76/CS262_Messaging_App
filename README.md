@@ -11,7 +11,8 @@ Messaging App for CS262 Assignment
 - To connect with the database, run the following command
 	mysql -h messenger.c57b9wmfsuhp.us-east-1.rds.amazonaws.com -P 3306 -u cs262admin -p
 	The password is cs262project 
-	
+
+# Description
 For our CS262 project, we implemented protocol buffers and a RESTFUL API. On top of this, we built a web UI to interact with the server. The database is deployed online on AWS. Interact with the right side bar to find users to message and create and find groups to message. Authentication has also been implemented as well. You can also login, logout, and delete your accoun .
 
 # Functionality
