@@ -11,7 +11,6 @@
           <button type="button" id = "logout">Logout</button>
           <button type="button" id = "delete_account">Delete Account</button>
           <br>
-          <!--<button type="button" id = "create_group">Create Group </button>-->
           <button type="button" id="create_group" data-toggle="modal" data-target="#myModal">Create Group</button>
         </div>
 
@@ -21,16 +20,14 @@
           <input type="search" id="search_users" placeholder="Search..." />
         </div>
         
-          <select class="singleMultiple user_select" size="5" multiple></select>
+        <select id= 'u_sel' class="singleMultiple user_select" size="5" multiple></select>
 
         <div class="seperator"> Groups </div>
         <div class="box">
           <span class="icon"><i class="fa fa-search"></i></span>
           <input type="search" id="search_groups" placeholder="Search..." />
         </div>
-          <select class="singleMultiple group_select" size="5" multiple></select>
-
-        <ul class="list-groups"> </ul>
+        <select id = 'g_sel' class="singleMultiple group_select" size="5" multiple></select>
 
         <div class="seperator">  </div>
       </div>
@@ -38,10 +35,6 @@
     </li>
   </ul>
 
-    <li class="login page">
-    </li>
-
-    <button type="button" data-toggle="modal" data-target="#myModal">Create Group</button>
     <div id="myModal" class="modal fade" role="dialog">
       <div class="modal-dialog">
         <!-- Modal content-->

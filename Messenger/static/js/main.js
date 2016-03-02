@@ -99,7 +99,6 @@ function updateChat() {
       }
 
       messages_out.reverse()
-      
       for (var j = 0; j < messages_out.length; j++) {
         addChatMessage(messages_out[j])
       }
@@ -150,7 +149,7 @@ function updateUsers(){
         }
         console.log(users_out)
         users_out.reverse()
-        $('#user_select').empty()
+        $('.user_select').empty()
         for (var j = 0; j < users_out.length; j++) {
           var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
           $(".user_select").append(option)
@@ -169,9 +168,6 @@ function updateUsers(){
 }
 
 function updateGroups(){
-    url = "get_groups"
-    data = {format:'json'}
-
     success = function(groups) {
       var num_groups = groups.length
       
@@ -194,20 +190,24 @@ function updateGroups(){
           }
         }
         groups_out.reverse()
+        $('.group_select').empty()
         for (var j = 0; j < groups_out.length; j++) {
-          var option = $('<option></option>').attr("value", groups_out[j].user_ids).text(groups_out[j].group_name);
+          var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
           $(".group_select").append(option)
         }
       }
     }
+    data = {format:'json'}
+
     a = $.ajax({
       dataType: "json",
-      url: url,
+      url: "get_groups",
       data: data,
       success: success,
       error: function(data){console.log(data)}
     });
 }
+
 
 // Log a message
 function log (message, options) {
@@ -297,6 +297,7 @@ function getUsernameColor (username) {
 
 // Keyboard events
 $window.keydown(function (event) {
+
   // When the client hits ENTER on their keyboard
   if (event.which === 13) {
     if (username) {
@@ -325,10 +326,6 @@ window.setInterval(function(){
   updateGroups();
 }, user_int);
 
- document.getElementById("logout").onclick = function () {
-        location.href = "/logout";
-    };
-
 //Logout of account
 $("#logout").click(function () {
     location.href = "/logout";
@@ -342,19 +339,19 @@ $("#delete_account").click(function() {
 });
 
 //Update infor that new user is selected
-$('#user_select').change(function(){ 
+$('#u_sel').change(function(){ 
   type_selected = 'user';
   currently_selected = $(this).val();
   change_user = true;
-   $('#group_select option').removeAttr("selected");
+   $('#g_sel option').removeAttr("selected");
 });
 
 //Update infor that new group is selected
-$('#group_select').change(function(){ 
+$('#g_sel').change(function(){ 
   type_selected = 'group';
   currently_selected = $(this).val();
   change_user = true;
-   $('#user_select option').removeAttr("selected");
+   $('#u_sel option').removeAttr("selected");
 });
     
 //Send messsage on enter
@@ -380,13 +377,3 @@ $('.modalCreateButton').click(function (){
    });
 })
 
-// Click events
-// Focus input when clicking anywhere on login page
-$loginPage.click(function () {
-  $currentInput.focus();
-});
-
-// Focus input when clicking on the message input's border
-$inputMessage.click(function () {
-  $inputMessage.focus();
-});

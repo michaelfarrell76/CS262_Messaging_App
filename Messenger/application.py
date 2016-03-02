@@ -199,6 +199,7 @@ def send_message():
     group_name = result[1]
 
     message = request.form['message']
+    print(message)
 
     pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
     query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \
@@ -222,22 +223,22 @@ def get_message():
 
         user_ids = sorted([current_user.id, other_user])
         users_str = '"[' + ", ".join(user_ids) + ']"'
-        query = 'SELECT * from groups WHERE user_ids = %s' %users_str
+        query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' %users_str
         result_proxy = s.execute(query)
+        result = result_proxy.fetchone()
+        group_id = result[0]
+    else:
+        group_id = other_user
+ 
+    result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
+    s.close()
     results = result_proxy.fetchall()
     out = []
-    if len(results) > 0:
-        group_id = results[0][0]
-
-        
-        result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
-        s.close()
-        results = result_proxy.fetchall()
-        for result in reversed(results):
-            message_id = result[0]
-            name = result[1]
-            message = result[2]
-            out.append((message_id, name, message))
+    for result in reversed(results):
+        message_id = result[0]
+        name = result[1]
+        message = result[2]
+        out.append((message_id, name, message))
 
     return json.dumps(out)
 
@@ -283,6 +284,8 @@ def create_group():
         name = request.form['group_name']
         user_ids = user_ids.split(',')
         user_ids = [int(user_id) for user_id in user_ids]
+        user_ids.append(int(current_user.id))
+
         user_ids.sort()
         user_ids = str(user_ids)
         Session = scoped_session(sessionmaker(bind=engine))
@@ -314,21 +317,15 @@ def get_groups():
     result = s.execute('SELECT * FROM groups')
     s.close()
     results = result.fetchall()
-    application.logger.error('WTF')
     out = []
     for result in results:
         group_id = result[0]
         group_name = result[1]
         user_ids = ast.literal_eval(result[2])
-        application.logger.error(user_ids)
-        if current_user.id in user_ids:
+        if len(user_ids) > 2 and int(current_user.id) in user_ids:
             out.append((group_id, group_name, user_ids))
-    application.logger.error(results)
     return json.dumps(out)
 
-@application.route('/test')
-def test():
-    return render_template('test.html')
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')
