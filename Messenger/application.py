@@ -176,9 +176,12 @@ def send_message():
 
 
     if len(results) == 0:
-        query = 'insert into groups (groupname, user_ids) VALUES(%s, %s);' % ('twousers', users_str)
+        query = 'insert into groups (groupname, user_ids) VALUES("twousers", %s)' % ( users_str)
+        s.execute(query)
+        query = 'SELECT * from groups WHERE user_ids = %s' %users_str
         result_proxy = s.execute(query)
         results = result_proxy.fetchall()
+
 
     if len(results) > 1:
         application.logger.error('MULTIPLE GROUPS FOR ' + users_str)
