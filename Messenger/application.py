@@ -93,9 +93,7 @@ def home():
 @application.route('/login', methods=['POST', 'GET'])
 def login():
     """Renders the login page."""
-    print('a')
     if request.method == 'POST':
-        print('b')
         email = request.form['email']
         password = request.form['password']
 
@@ -110,7 +108,6 @@ def login():
             return json.dumps({}, 500, {'ContentType':'application/json'})
         
         true_password = result[2]
-        print('here')
 
         if check_password_hash(true_password, password):
             user_id = result[0]
@@ -199,15 +196,11 @@ def send_message():
     group_name = result[1]
 
     message = request.form['message']
-    print(message)
 
     pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
     query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \
                         'VALUES ("%s", "%s", "%s", %d)' % pkg
-                
-
     s.execute(query)
-
     s.commit()
     s.close() 
     return json.dumps({}, 200, {'ContentType':'application/json'})
@@ -220,7 +213,6 @@ def get_message():
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     if select_type == "user":
-
         user_ids = sorted([current_user.id, other_user])
         users_str = '"[' + ", ".join(user_ids) + ']"'
         query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' %users_str
@@ -235,7 +227,6 @@ def get_message():
     results = result_proxy.fetchall()
     out = []
     for result in reversed(results):
-        print(result)
         message_id = result[0]
         name = result[1]
         message = result[2]
@@ -255,10 +246,8 @@ def get_users():
         user_id = result[0]
         name = result[1]
         email = result[2]
-
         if user_id != int(current_user.id):
             out.append((user_id, name, email))
-
     return json.dumps(out)
 
 @application.route('/logout')
@@ -288,6 +277,10 @@ def create_group():
         user_ids.append(int(current_user.id))
 
         user_ids.sort()
+        if len(user_ids) <= 2:
+            flash('Groups must be made with more than 2 people')
+            return json.dumps({}, 403, {'ContentType':'application/json'})
+        
         user_ids = str(user_ids)
         Session = scoped_session(sessionmaker(bind=engine))
         s = Session()
