@@ -1,0 +1,9 @@
+message MsgClient {
+	optional string message = 1; 
+	optional string other_uid = 2;
+	optional string select_type = 3;
+}
+
+//message MsgServer {
+	
+//}

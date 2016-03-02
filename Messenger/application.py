@@ -23,6 +23,12 @@ import flask.ext.login as flask_login
 from flask_login import LoginManager, current_user
 from werkzeug.security import generate_password_hash, \
      check_password_hash
+import message_pb2
+from protobuf_to_dict import protobuf_to_dict
+import base64
+
+
+USE_PROTOBUFF = False
 
 # Default config vals
 FLASK_DEBUG = 'false' if os.environ.get('FLASK_DEBUG') is None else os.environ.get('FLASK_DEBUG')
@@ -165,6 +171,23 @@ def register():
 
 @application.route('/send_message', methods=['POST'])
 def send_message():
+
+    if USE_PROTOBUFF:
+        #useProto = request.headers['Accept'] == "application/x-protobuf"
+        #protoString = request.form["protoString"]
+        print request.stream.read()
+        print request.get_data()
+        print request.data
+        MsgClient = message_pb2.MsgClient()
+        MsgClient.ParseFromString(request.data)
+        print MsgClient, "MsgClient"
+        dictProtoBuff = protobuf_to_dict(MsgClient)
+        print dictProtoBuff, "dictProtoBuff"
+        message = None
+        other_user = None
+        select_type = None
+
+
     other_id =  request.form['other_uid']
     select_type =  request.form['select_type']
 

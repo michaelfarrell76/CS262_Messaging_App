@@ -36,6 +36,15 @@ var connected = false;
 var typing = false;
 var change_user = false;
 
+var useProto = false;
+
+// Some Proto Code
+
+var ProtoBuf = dcodeIO.ProtoBuf;
+console.log(ProtoBuf)
+
+var builder = ProtoBuf.loadProtoFile("/static/message.proto");
+var MsgClient = builder.build("MsgClient");
 
 $chatPage.show();
 $currentInput = $inputMessage.focus();
@@ -57,10 +66,51 @@ function sendMessage () {
     var message = cleanInput($inputMessage.val());
     if (message) {
       $inputMessage.val('');
-      data = {message:message, 
+      var data;
+
+      if (!useProto){
+        data = {message:message, 
               other_uid: cleanInput(currently_selected),
               select_type: type_selected}
       $.post("send_message", data)
+      }else{
+        console.log("using proto")
+        data = new MsgClient({
+          message: message,
+          other_uid: cleanInput(currently_selected),
+          select_type:'user'
+        });
+
+        // var req = {
+        //   method: 'POST',
+        //   url: '/send_message',
+        //   responseType: 'arraybuffer',
+        //   transformRequest: function(r) { return r;},
+        //   data: data.toArrayBuffer(),
+        //   headers: {
+        //     'Content-Type': 'binary/octet-stream'
+        //   }
+        // };
+
+        // success = function(data){
+        //   console.log("sent request");
+        //   console.log(data);
+        // }
+
+        console.log(data.toBase64());
+
+        // $.ajax({
+        //   type: "POST",
+        //   beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
+        //   url: "send_message", 
+        //   data: {protoString: data.toBase64()}, 
+        //   success: success,
+        //   error: function(data){console.log('failure'); console.log(data)}
+        // })
+        console.log("posting data")
+        $.post("send_message", data.toArrayBuffer())
+      }
+
     }
     updateChat();
     updateUsers();
