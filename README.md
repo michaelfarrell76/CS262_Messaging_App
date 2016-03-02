@@ -1,6 +1,16 @@
 # CS262_Messaging_App
 Messaging App for CS262 Assignment
 
+Start using protocol buffers:
+
+python application.py --protobuff
+
+Start using RESTFUL
+
+python application.py 
+
+Can also be switched on the app
+
 # Setup
 - pip install flask
 - pip install mysql
