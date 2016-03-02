@@ -183,7 +183,7 @@ def get_message():
     for result in results:
         message_id = result[4]
         name = result[1]
-        message = result[6]
+        message = result[7]
         out.append((message_id, name, message))
     return json.dumps(out)
 

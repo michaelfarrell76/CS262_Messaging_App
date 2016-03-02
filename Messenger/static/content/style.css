@@ -342,9 +342,21 @@ ul {
 }
 
 .list-users {
-
+   height: 100px;
+overflow: scroll;
 }
 
 .list-groups {
 
+}
+
+.button_panel {
+   background: #707070;
+}
+
+ 
+.box{
+  padding-left: 10%;
+  background: #343d46;
+  height: 25px;
 }

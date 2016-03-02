@@ -12,10 +12,28 @@
         <ul class="messages"></ul>
       </div>
       <div class = "sidebar">
+        <div class="button_panel">
+          <button type="button" id = "logout">Logout</button>
+          <button type="button" id = "delete_account">Delete Account</button>
+          <br>
+          <button type="button" id = "create_group">Create Group </button>
+        </div>
+
         <div class="seperator"> Users </div>
+        <div class="box">
+          <span class="icon"><i class="fa fa-search"></i></span>
+          <input type="search" id="search_users" placeholder="Search..." />
+        </div>
         <ul class="list-users"></ul>
+
         <div class="seperator"> Groups </div>
+        <div class="box">
+          <span class="icon"><i class="fa fa-search"></i></span>
+          <input type="search" id="search_groups" placeholder="Search..." />
+        </div>
         <ul class="list-groups"> </ul>
+
+        <div class="seperator">  </div>
       </div>
       <input class="inputMessage" placeholder="Type here..."/>
 

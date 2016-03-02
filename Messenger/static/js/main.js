@@ -136,6 +136,7 @@ function updateUsers(){
         }
         console.log(users_out)
         users_out.reverse()
+        $userList.empty();
         for (var j = 0; j < users_out.length; j++) {
           addUsersToList(users_out[j])
         }
@@ -197,9 +198,9 @@ function removeChatTyping (data) {
 }
 
 function addUsersToList(data){
-  console.log(data)
-  console.log("adding users")
-  $userList.append($('<li>' + data.name + '</li>'))
+  console.log(data);
+  console.log("adding users");
+  $userList.append($('<li>' + data.name + '</li>'));
 }
 
 
@@ -308,7 +309,14 @@ window.setInterval(function(){
   updateUsers();
 }, 5000);
 
+ document.getElementById("logout").onclick = function () {
+        location.href = "/logout";
+    };
 
+
+ document.getElementById("delete_account").onclick = function () {
+       
+    };
 
 $inputMessage.keydown(function (e) {
   if (e.keyCode == 13)
