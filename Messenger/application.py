@@ -7,6 +7,7 @@ import os
 import sys
 import json
 import time
+import ast
 
 from datetime import datetime
 
@@ -278,9 +279,12 @@ def delete_account():
 @application.route('/create_group', methods=['POST', 'GET'])
 def create_group():
     if request.method == 'POST':
-        groupname = request.form['groupname']
-        user_ids = request.form['']
-
+        user_ids = request.form['user_ids']
+        name = request.form['group_name']
+        user_ids = user_ids.split(',')
+        user_ids = [int(user_id) for user_id in user_ids]
+        user_ids.sort()
+        user_ids = str(user_ids)
         Session = scoped_session(sessionmaker(bind=engine))
         s = Session()
         result_proxy = s.execute('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
@@ -292,16 +296,10 @@ def create_group():
         try:
             Session = scoped_session(sessionmaker(bind=engine))
             s = Session()
-            s.execute('INSERT INTO groups(name, user_ids) VALUES ("' + str(name) + '","' + str(user_ids) + '")') 
-            result_proxy = s.execute ('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
+            s.execute('INSERT INTO groups(groupname, user_ids) VALUES ("' + name + '","' + user_ids + '")') 
             s.commit()
             s.close()
-            result = result_proxy.fetchone()
-            group_id = result[0]
-            group = User(group_id, groupname, user_ids)
-            flask_login.login_user(group)
-            data = {'user_ids': user_ids, 'groupname':groupname}
-            return json.dumps(data, 200, {'ContentType':'application/json'})
+            return json.dumps({}, 200, {'ContentType':'application/json'})
         except:
             return json.dumps({}, 403, {'ContentType':'application/json'})
     else:
@@ -309,15 +307,28 @@ def create_group():
             'create_group.html'
         )
 
-@application.route('/get_groups')
+@application.route('/get_groups', methods=['POST', 'GET'])
 def get_groups():
-    Session = scoped_session(sessionmaker(bing=engine))
+    Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result = s.execute('SELECT * FROM groups')
     s.close()
     results = result.fetchall()
-    return str(results)
+    application.logger.error('WTF')
+    out = []
+    for result in results:
+        group_id = result[0]
+        group_name = result[1]
+        user_ids = ast.literal_eval(result[2])
+        application.logger.error(user_ids)
+        if current_user.id in user_ids:
+            out.append((group_id, group_name, user_ids))
+    application.logger.error(results)
+    return json.dumps(out)
 
+@application.route('/test')
+def test():
+    return render_template('test.html')
 
 if __name__ == '__main__':
     application.run(host='0.0.0.0')

@@ -2,6 +2,7 @@ var FADE_TIME = 150; // ms
 var TYPING_TIMER_LENGTH = 400; // ms
 var global_latest_message_id = 0;
 var global_user_count = 0
+var global_groups_count = 0
 var COLORS = [
   '#e21400', '#91580f', '#f8a700', '#f78b00',
   '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
@@ -152,8 +153,9 @@ function updateUsers(){
         $('#user_select').empty()
         for (var j = 0; j < users_out.length; j++) {
           var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
-          $("#user_select").append(option)
+          $(".user_select").append(option)
         }
+      $('.ui.dropdown').dropdown({allowAdditions: false});  
       }
     }
 
@@ -163,6 +165,47 @@ function updateUsers(){
       url: "get_users",
       data: data,
       success: success
+    });
+}
+
+function updateGroups(){
+    url = "get_groups"
+    data = {format:'json'}
+
+    success = function(groups) {
+      var num_groups = groups.length
+      
+      if (num_groups > global_groups_count) {
+        global_groups_count = num_groups
+        latest_groups_id = groups[0][0]
+        groups_out = []
+        for (var i = 0; i < num_groups; i++) { 
+          group = groups[i]
+          if (group[0] >= latest_groups_id) {
+            groups_data = {}
+            groups_data.group_id = group[0]
+            console.log(group[2])
+            groups_data.group_name = group[1]
+            groups_data.user_ids = group[2] 
+            groups_out.push(groups_data)
+          }
+          else {
+            break
+          }
+        }
+        groups_out.reverse()
+        for (var j = 0; j < groups_out.length; j++) {
+          var option = $('<option></option>').attr("value", groups_out[j].user_ids).text(groups_out[j].group_name);
+          $(".group_select").append(option)
+        }
+      }
+    }
+    a = $.ajax({
+      dataType: "json",
+      url: url,
+      data: data,
+      success: success,
+      error: function(data){console.log(data)}
     });
 }
 
@@ -254,10 +297,6 @@ function getUsernameColor (username) {
 
 // Keyboard events
 $window.keydown(function (event) {
-  // Auto-focus the current input when a key is typed
-  if (!(event.ctrlKey || event.metaKey || event.altKey)) {
-    $currentInput.focus();
-  }
   // When the client hits ENTER on their keyboard
   if (event.which === 13) {
     if (username) {
@@ -272,6 +311,7 @@ $window.keydown(function (event) {
 // run coder once as soon as everything is ready
 $(document).ready(function(){
   updateUsers();
+  updateGroups();
 });
 
 //How often we update the chat
@@ -282,7 +322,12 @@ window.setInterval(function(){
 //how often we update the users
 window.setInterval(function(){
   updateUsers();
+  updateGroups();
 }, user_int);
+
+ document.getElementById("logout").onclick = function () {
+        location.href = "/logout";
+    };
 
 //Logout of account
 $("#logout").click(function () {
@@ -319,3 +364,29 @@ $inputMessage.keydown(function (e) {
   }
 });
 
+$('.modalCreateButton').click(function (){
+  var values = $("#group_select>option:selected").map(function() { return parseInt($(this).val()); });
+  var name = cleanInput($("#group_name").val())
+  values = cleanInput(values.get())
+  $("#group_select>option:selected").removeAttr("selected");
+  $('.ui.dropdown').dropdown('restore defaults'); 
+  $('#group_name').val('')
+  $.ajax({
+    type: "POST",
+    dataType: "json",
+    url: 'create_group',
+    data: {user_ids: values, group_name:name},
+    success: function(data) {console.log('Success')}
+   });
+})
+
+// Click events
+// Focus input when clicking anywhere on login page
+$loginPage.click(function () {
+  $currentInput.focus();
+});
+
+// Focus input when clicking on the message input's border
+$inputMessage.click(function () {
+  $inputMessage.focus();
+});

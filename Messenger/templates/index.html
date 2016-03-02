@@ -11,7 +11,8 @@
           <button type="button" id = "logout">Logout</button>
           <button type="button" id = "delete_account">Delete Account</button>
           <br>
-          <button type="button" id = "create_group">Create Group </button>
+          <!--<button type="button" id = "create_group">Create Group </button>-->
+          <button type="button" id="create_group" data-toggle="modal" data-target="#myModal">Create Group</button>
         </div>
 
         <div class="seperator"> Users </div>
@@ -20,13 +21,15 @@
           <input type="search" id="search_users" placeholder="Search..." />
         </div>
         
-        <select class="singleMultiple" id = "user_select" size="5" multiple></select>
+          <select class="singleMultiple user_select" size="5" multiple></select>
 
         <div class="seperator"> Groups </div>
         <div class="box">
           <span class="icon"><i class="fa fa-search"></i></span>
           <input type="search" id="search_groups" placeholder="Search..." />
         </div>
+          <select class="singleMultiple group_select" size="5" multiple></select>
+
         <ul class="list-groups"> </ul>
 
         <div class="seperator">  </div>
@@ -35,6 +38,44 @@
     </li>
   </ul>
 
-<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="/static/js/main.js"></script>
+    <li class="login page">
+    </li>
+
+    <button type="button" data-toggle="modal" data-target="#myModal">Create Group</button>
+    <div id="myModal" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header modal-background">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title modal-background">Create Group</h4>
+          </div>
+          <div class="modal-body modal-background">
+          <form class="form-horizontal" role="form">
+              <div class="form-group">
+                <input type="Group Name" class="form-control" 
+                id="group_name" placeholder="Group Name"/>
+              </div>
+                <div class="form-group">
+                  <select class="ui fluid search dropdown user_select" id='group_select' multiple="">
+                    <option value="">Users</option>
+                  </select> 
+                </div>
+          </form> 
+          <div class="modal-footer modal-background">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-default modalCreateButton" data-dismiss="modal">Create</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script src="/static/js/main.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <script data-require="jquery@*" data-semver="2.1.4" src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <link data-require="semantic-ui@*" data-semver="1.11.5" rel="stylesheet" href="http://cdn.jsdelivr.net/semantic-ui/2.0.8/semantic.min.css" />
+  <script data-require="semantic-ui@*" data-semver="1.11.5" src="http://cdn.jsdelivr.net/semantic-ui/2.0.8/semantic.min.js"></script>
+  <script src="/static/js/modal.js"></script>
 {% endblock %}
