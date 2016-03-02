@@ -13,6 +13,7 @@ var COLORS = [
 var $window = $(window);
 var $usernameInput = $('.usernameInput'); // Input for username
 var $messages = $('.messages'); // Messages area
+var $messages_id = $('#messages_loc');
 var $inputMessage = $('.inputMessage'); // Input message input box
 var $loginButton = $('.login_button'); // Input message input box
 var $registerButton = $('.register_button'); // Input message input box
@@ -65,20 +66,30 @@ function sendMessage () {
   message = cleanInput(message);
   if (message) {
     $inputMessage.val('');
-    $.post("send_message", {message:message, email:email})
+    data = {message:message, 
+            email:email,
+            other_uid: cleanInput(currently_selected),
+            select_type: 'user'}
+    $.post("send_message", data)
   }
 }
 
 function updateChat() {
   
   success = function(messages) {
+
     //console.log(messages)
     var messages_len = messages.length
-    newest_message_id = messages[0][0]
+    if(messages == ''){
+      newest_message_id = 0
+    }
+    else{
+      newest_message_id = messages[0][0]
+    }
+   
     if(change_user){
-      global_latest_message_id = -1;
-
-      $messageDiv.clear();
+      global_latest_message_id = 0;
+      $messages.empty();
       
     }
     if (newest_message_id > global_latest_message_id) {
@@ -105,13 +116,15 @@ function updateChat() {
       for (var j = 0; j < messages_out.length; j++) {
         addChatMessage(messages_out[j])
       }
-      if(change_user){
-        change_user = false;
-      }
+    }
+    if(change_user){
+      change_user = false;
     }
   }
   if (currently_selected){
-    data = {user_id: cleanInput(currently_selected)}
+    data = {user_id: cleanInput(currently_selected),
+       select_type: 'user'}
+      
   
 
     url = 'get_messages'
@@ -147,6 +160,7 @@ function updateUsers(){
             user_data.user_id = user[0]
             user_data.name = user[1]
             user_data.email = user[2] 
+            user_data.group_id = user[3]
             users_out.push(user_data)
           }
           else {
@@ -345,6 +359,7 @@ document.getElementById("delete_account").onclick = function () {
 $('#user_select').change(function(){ 
 
   currently_selected = $(this).val();
+
   change_user = true;
   });
     

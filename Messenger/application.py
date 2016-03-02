@@ -159,37 +159,82 @@ def register():
 @application.route('/send_message', methods=['POST'])
 def send_message():
     # Need some error checking here probably if we want to be robust about security
+    print('send')
+    other_user =  request.form['other_uid']
+    select_type =  request.form['select_type']
+    if select_type == "user":
+        user_ids = sorted([current_user.id, other_user])
+        users_str = '"[' + ", ".join(user_ids) + ']"'
+
+
+    query = 'SELECT * from groups WHERE user_ids = %s' %users_str
+
+    Session = scoped_session(sessionmaker(bind=engine))
+    s = Session()
+    result_proxy = s.execute(query)
+    results = result_proxy.fetchall()
+
+
+    if len(results) == 0:
+        query = 'insert into groups (groupname, user_ids) VALUES(%s, %s);' % ('twousers', users_str)
+        result_proxy = s.execute(query)
+        results = result_proxy.fetchall()
+
+    if len(results) > 1:
+        application.logger.error('MULTIPLE GROUPS FOR ' + users_str)
+    
+    group_id = results[0][0]
+    group_name = results[0][1]
+
+   
 
     message = request.form['message']
     email = request.form['email']
-    # NEED TO GRAB USER ID FROM THE PAGE
-    query = 'INSERT INTO messages(user_id, message, time_sent) VALUES (' + str(current_user.id) + ',' + '"' + str(message) + '"' + ', "' + time.strftime("%Y-%m-%d %H:%M:%S") + '")'
-    application.logger.error(query)
-    Session = scoped_session(sessionmaker(bind=engine))
-    s = Session()
-    result = s.execute('INSERT INTO messages(user_id, message, time_sent) VALUES (' + str(current_user.id) + ',"' + str(message) + '"' + ', "' + time.strftime("%Y-%m-%d %H:%M:%S") + '")')
+    query = 'INSERT INTO messages(user_id, message, time_sent, group_id) VALUES ("%s", "%s", "%s", %d)' %(str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
+    result_proxy = s.execute(query)
+    # results = result_proxy.fetchall()
+
+    print(query)
+
     s.commit()
     s.close()
+
+
+
+ 
     return json.dumps({}, 200, {'ContentType':'application/json'})
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
+
     other_user =  request.form['user_id']
-    print(other_user)
+    select_type =  request.form['select_type']
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
-    
-    result_proxy = s.execute('SELECT * from messages where user_id = %s AND to_group_id IS NULL' % other_user)
-    s.close()
+    if select_type == "user":
+
+        user_ids = sorted([current_user.id, other_user])
+        users_str = '"[' + ", ".join(user_ids) + ']"'
+        query = 'SELECT * from groups WHERE user_ids = %s' %users_str
+        result_proxy = s.execute(query)
     results = result_proxy.fetchall()
     out = []
+    if len(results) > 0:
+        group_id = results[0][0]
 
-    for result in results:
-        message_id = result[0]
-        name = other_user
-        message = result[3]
+        
+        result_proxy = s.execute('SELECT * from messages where group_id= %s' % group_id)
+        s.close()
+        results = result_proxy.fetchall()
+        
 
-        out.append((message_id, name, message))
+        for result in reversed(results):
+
+            message_id = result[0]
+            name = result[1]
+            message = result[3]
+
+            out.append((message_id, name, message))
     return json.dumps(out)
 
 @application.route('/get_users')
@@ -204,7 +249,10 @@ def get_users():
         user_id = result[0]
         name = result[1]
         email = result[2]
-        out.append((user_id, name, email))
+
+        if user_id != int(current_user.id):
+            out.append((user_id, name, email))
+
     return json.dumps(out)
 
 @application.route('/logout')
