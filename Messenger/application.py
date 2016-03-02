@@ -26,9 +26,11 @@ from werkzeug.security import generate_password_hash, \
 import message_pb2
 from protobuf_to_dict import protobuf_to_dict
 import base64
+import optparse
 
+global USE_PROTOBUFF 
 
-USE_PROTOBUFF = True
+USE_PROTOBUFF = False
 
 # Default config vals
 FLASK_DEBUG = 'false' if os.environ.get('FLASK_DEBUG') is None else os.environ.get('FLASK_DEBUG')
@@ -89,11 +91,14 @@ def request_loader(request):
 @application.route('/')
 @flask_login.login_required
 def home():
+    global USE_PROTOBUFF 
+
     """Renders the chat page."""
     return render_template(
         'index.html',
         title='Messenger',
         year=datetime.now().year,
+        USE_PROTOBUFF=USE_PROTOBUFF
     )
 
 @application.route('/login', methods=['POST', 'GET'])
@@ -171,6 +176,7 @@ def register():
 
 @application.route('/send_message', methods=['POST'])
 def send_message():
+    global USE_PROTOBUFF 
 
     if USE_PROTOBUFF:
         MsgClient = message_pb2.MsgClient()
@@ -226,6 +232,8 @@ def send_message():
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
+    global USE_PROTOBUFF 
+
     if USE_PROTOBUFF:
         PreMsgClient = message_pb2.PreMsgClient()
 
@@ -287,6 +295,7 @@ def get_message():
 
 @application.route('/get_users')
 def get_users():
+    global USE_PROTOBUFF 
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result = s.execute('SELECT * FROM users')
@@ -324,6 +333,13 @@ def logout():
     flask_login.logout_user()
     return redirect("login", code=302)
 
+@application.route('/transfer')
+def transfer():
+    global USE_PROTOBUFF 
+    print(USE_PROTOBUFF)
+    USE_PROTOBUFF = ~USE_PROTOBUFF
+    return redirect("/", code=302)
+
 @application.route('/delete_account')
 def delete_account():
     Session = scoped_session(sessionmaker(bind=engine))
@@ -338,6 +354,7 @@ def delete_account():
 
 @application.route('/create_group', methods=['POST', 'GET'])
 def create_group():
+    global USE_PROTOBUFF 
     if request.method == 'POST':
 
         if USE_PROTOBUFF:
@@ -389,6 +406,7 @@ def create_group():
 
 @application.route('/get_groups', methods=['POST', 'GET'])
 def get_groups():
+    global USE_PROTOBUFF 
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result = s.execute('SELECT * FROM groups')
@@ -421,4 +439,15 @@ def get_groups():
 
 
 if __name__ == '__main__':
+    parser = optparse.OptionParser()
+    parser.add_option('--protobuff', action="store_true", default=False)
+
+    options, args =  parser.parse_args()
+
+    USE_PROTOBUFF = options.protobuff
+
+    if USE_PROTOBUFF:
+        print('Running with Protobuffs')
+    else:
+        print('Running with REST')
     application.run(host='0.0.0.0')

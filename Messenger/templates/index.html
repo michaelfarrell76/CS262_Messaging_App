@@ -7,8 +7,14 @@
         <ul class="messages" id = "messages_loc"></ul>
       </div>
 
+       {% if USE_PROTOBUFF %}
+         Currently Using Protocol Buffers
+        {% else %}
+         Currently Using RESTFUL
+        {% endif %}
+      <div class="topbar">
 
-      <div class="topbar"><div class='center'> No Chat Selected </div></div>
+        <div class='center'> No Chat Selected </div></div>
       <div class = "sidebar">
        
         <div class="seperator"> Users </div>
@@ -37,6 +43,12 @@
 
 
         <div class="seperator">  </div>
+        {% if USE_PROTOBUFF %}
+          <button type="button" id="transfer" >Switch to RESTFUL</button>
+        {% else %}
+          <button type="button" id="transfer" > Switch to Protocol Buffers</button>
+        {% endif %}
+
       </div>
       <input class="inputMessage" placeholder="Type here..."/>
     </li>

@@ -33,7 +33,7 @@ var connected = false;
 var typing = false;
 var change_user = false;
 
-var useProto = true;
+var useProto = USE_PROTOBUFF;
 
 // Some Proto Code
 var protojson = angular.module('protojson', []);
@@ -549,6 +549,13 @@ $("#delete_account").click(function() {
     location.href = "/delete_account"; 
   }
 });
+
+$("#transfer").click(function() {
+
+    location.href = "/transfer"; 
+
+});
+
 
 //Update infor that new user is selected
 $('#u_sel').change(function(){ 
