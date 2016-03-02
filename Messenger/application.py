@@ -273,6 +273,7 @@ def get_message():
     else:
         out = []
 
+
     for result in reversed(results):
         message_id = result[0]
         name = result[1]
@@ -285,7 +286,7 @@ def get_message():
                     ))
         else:
             out.append((message_id, name, message))
-            
+   
     if USE_PROTOBUFF:
         PostMsgClient = message_pb2.PostMsgClient(messages = msgBuf)
         return base64.b64encode(PostMsgClient.SerializeToString())
@@ -320,12 +321,12 @@ def get_users():
                     ))
             else:
                 out.append((user_id, name))
-            
     if USE_PROTOBUFF:
         UsrUsrs = message_pb2.UsrUsrs(usrs = usrUsrs)
         return base64.b64encode(UsrUsrs.SerializeToString())
   
     else:
+
         return json.dumps(out)
 
 @application.route('/logout')
@@ -337,7 +338,10 @@ def logout():
 def transfer():
     global USE_PROTOBUFF 
     print(USE_PROTOBUFF)
-    USE_PROTOBUFF = ~USE_PROTOBUFF
+    if USE_PROTOBUFF:
+        USE_PROTOBUFF = False
+    else:
+        USE_PROTOBUFF = True
     return redirect("/", code=302)
 
 @application.route('/delete_account')

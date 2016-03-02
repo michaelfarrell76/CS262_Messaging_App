@@ -33,7 +33,9 @@ var connected = false;
 var typing = false;
 var change_user = false;
 
-var useProto = USE_PROTOBUFF;
+var useProto = (USE_PROTOBUFF === "True");
+console.log(useProto);
+console.log(true)
 
 // Some Proto Code
 var protojson = angular.module('protojson', []);
@@ -234,7 +236,9 @@ function updateChat() {
 }
 
 function updateUsers(){
+console.log(useProto)
   if (!useProto){
+
     success = function(users) {
 
       var num_users = users.length
@@ -365,7 +369,7 @@ function updateGroups(){
         url: "get_groups",
         data: {format:'json'},
         success: success,
-        error: function(data){console.log(data)}
+        error: function(data){console.log()}
       });
     }
     else{

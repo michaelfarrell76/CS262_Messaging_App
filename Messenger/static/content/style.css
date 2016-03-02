@@ -31,6 +31,8 @@ ul {
   word-wrap: break-word;
 }
 
+
+
 .alert {
   color: #fff;
   font-weight: 100;
@@ -377,6 +379,15 @@ ul {
 }
 
 .center {
-    text-align: 45%;
-    padding: 50px;
+  position:absolute;
+  top:25%; 
+  height:10%;
+  left: 5%;
+
+  color: #7c795d; 
+  font-family: 'Trocchi', serif; 
+  font-size: 45px; 
+  font-weight: normal; 
+  line-height: 48px; 
+  
 }
