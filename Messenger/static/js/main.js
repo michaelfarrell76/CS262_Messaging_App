@@ -371,6 +371,7 @@ $inputMessage.keydown(function (e) {
   }
 });
 
+
 // Click events
 // Focus input when clicking anywhere on login page
 $loginPage.click(function () {

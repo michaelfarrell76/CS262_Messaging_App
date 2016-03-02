@@ -13,12 +13,15 @@ from datetime import datetime
 import flask
 from flask import request, Response, render_template, flash, redirect
 
+from sqlalchemy import exc
 import _mysql
 import sqlalchemy 
 from sqlalchemy.orm import sessionmaker, scoped_session
 from auth.auth import User
 import flask.ext.login as flask_login
 from flask_login import LoginManager, current_user
+from werkzeug.security import generate_password_hash, \
+     check_password_hash
 
 # Default config vals
 FLASK_DEBUG = 'false' if os.environ.get('FLASK_DEBUG') is None else os.environ.get('FLASK_DEBUG')
@@ -71,8 +74,7 @@ def request_loader(request):
         name = result[1]
         password = result[2]
         user = User(user_id, name, email)
-        # Should hash password here! Add in after finishing testing
-        user.is_authenticated = request.form['password'] == password    
+        user.is_authenticated = generate_password_hash(request.form['password']) == password    
         application.logger.error(user)
         return user
     return
@@ -90,9 +92,10 @@ def home():
 @application.route('/login', methods=['POST', 'GET'])
 def login():
     """Renders the login page."""
+    print('a')
     if request.method == 'POST':
+        print('b')
         email = request.form['email']
-        #password = hashlib.sha224(request.form['passwords']).hexdigest()
         password = request.form['password']
 
         Session = scoped_session(sessionmaker(bind=engine))
@@ -101,11 +104,17 @@ def login():
         s.close()
         result = result_proxy.fetchone()
 
-        user_id = result[0]
-        name = result[1]
+        if result == None:
+            flash('Email Address not found')
+            return json.dumps({}, 500, {'ContentType':'application/json'})
+        
         true_password = result[2]
+        print('here')
 
-        if true_password == password:
+        if check_password_hash(true_password, password):
+            user_id = result[0]
+            name = result[1]
+
             user = User(user_id, name, email)
             flask_login.login_user(user)
             data = {'email': email, 'name':name}
@@ -113,20 +122,19 @@ def login():
             resp = Response(data, status=200, mimetype='application/json')
             return json.dumps(data, 200, {'ContentType':'application/json'})
         else:
-            return json.dumps({}, 404, {'ContentType':'application/json'})
+            flash('Passwords do not match')
+            return json.dumps({}, 500, {'ContentType':'application/json'})
     else:
         return render_template(
             'login.html'
         )
 
 @application.route('/register', methods=['POST', 'GET'])
-@application.route('/register')
 def register():
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
-        password = request.form['password']
-        #password = hashlib.sha224(request.form['passwords']).hexdigest()
+        password = generate_password_hash(request.form['password'])
 
         Session = scoped_session(sessionmaker(bind=engine))
         s = Session()
@@ -150,6 +158,7 @@ def register():
             data = {'email': email, 'name':name}
             return json.dumps(data, 200, {'ContentType':'application/json'})
         except:
+            flash('An error occurred')
             return json.dumps({}, 403, {'ContentType':'application/json'})
     else:
         return render_template(
@@ -158,53 +167,48 @@ def register():
 
 @application.route('/send_message', methods=['POST'])
 def send_message():
-    # Need some error checking here probably if we want to be robust about security
-    print('send')
-    other_user =  request.form['other_uid']
+    other_id =  request.form['other_uid']
     select_type =  request.form['select_type']
-    if select_type == "user":
-        user_ids = sorted([current_user.id, other_user])
-        users_str = '"[' + ", ".join(user_ids) + ']"'
 
-
-    query = 'SELECT * from groups WHERE user_ids = %s' %users_str
+    if other_id == "null":
+        #not doing this right
+        return json.dumps({}, 403, {'ContentType':'application/json'})
 
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
-    result_proxy = s.execute(query)
-    results = result_proxy.fetchall()
 
-
-    if len(results) == 0:
-        query = 'insert into groups (groupname, user_ids) VALUES("twousers", %s)' % ( users_str)
-        s.execute(query)
-        query = 'SELECT * from groups WHERE user_ids = %s' %users_str
+    if select_type == "user":
+        user_ids = sorted([current_user.id, other_id])
+        users_str = '"[' + ", ".join(user_ids) + ']"'
+        query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' % users_str
         result_proxy = s.execute(query)
-        results = result_proxy.fetchall()
+        result = result_proxy.fetchone()
+        if result is None:
+            query = 'insert into groups (groupname, user_ids) VALUES("twousers", %s)' % users_str
+            s.execute(query)
+            query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' % users_str
+            result_proxy = s.execute(query)
+            result = result_proxy.fetchone()
+    else:
+        query = 'SELECT * from groups WHERE group_id = %s LIMIT 1' % other_id
+        result_proxy = s.execute(query)
+        result = result_proxy.fetchone()
 
-
-    if len(results) > 1:
-        application.logger.error('MULTIPLE GROUPS FOR ' + users_str)
-    
-    group_id = results[0][0]
-    group_name = results[0][1]
-
-   
+    group_id = result[0]
+    group_name = result[1]
 
     message = request.form['message']
     email = request.form['email']
-    query = 'INSERT INTO messages(user_id, message, time_sent, group_id) VALUES ("%s", "%s", "%s", %d)' %(str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
-    result_proxy = s.execute(query)
-    # results = result_proxy.fetchall()
 
-    print(query)
+    pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
+    query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \
+                        'VALUES ("%s", "%s", "%s", %d)' % pkg
+                
+
+    s.execute(query)
 
     s.commit()
-    s.close()
-
-
-
- 
+    s.close() 
     return json.dumps({}, 200, {'ContentType':'application/json'})
 
 @application.route('/get_messages', methods=['POST'])
@@ -273,7 +277,6 @@ def delete_account():
     return redirect("login", code=302)
 
 @application.route('/create_group', methods=['POST', 'GET'])
-@application.route('/create_group')
 def create_group():
     if request.method == 'POST':
         groupname = request.form['groupname']

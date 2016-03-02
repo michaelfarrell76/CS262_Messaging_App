@@ -1,11 +1,6 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat</title>
-  <link rel="stylesheet" href="/static/content/style.css">
-</head>
-<body>
+{% extends "layout.html" %}
+{% block body %}
+  
   <ul class="pages">
     <li class="chat page">
       <div class="chatArea">
@@ -24,10 +19,8 @@
           <span class="icon"><i class="fa fa-search"></i></span>
           <input type="search" id="search_users" placeholder="Search..." />
         </div>
-
-        <!-- <ul class="list-users"></ul> -->
-
-          <select class="singleMultiple" id = "user_select" size="5" multiple></select>
+        
+        <select class="singleMultiple" id = "user_select" size="5" multiple></select>
 
         <div class="seperator"> Groups </div>
         <div class="box">
@@ -39,12 +32,9 @@
         <div class="seperator">  </div>
       </div>
       <input class="inputMessage" placeholder="Type here..."/>
-
     </li>
   </ul>
-    <li class="login page">
-    </li>
-  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-  <script src="/static/js/main.js"></script>
-</body>
-</html>
+
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="/static/js/main.js"></script>
+{% endblock %}

@@ -1,27 +1,20 @@
-<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat</title>
-  <link rel="stylesheet" href="/static/content/style.css">
-</head>
-<body>
-  <ul class="pages">
+{% extends "layout.html" %}
+{% block body %}
 
-<li class="login page">
-  <div class="form">
-    <h3 class="title">What's your email?</h3>
-    <input class="loginInput" type="text" maxlength="100" />
-  <h3 class="title">What's your password?</h3>
+<ul class="pages">
+  <li class="login page">
+    <div class="form">
+      <h3 class="title">What's your email?</h3>
+      <input class="loginInput" type="text" maxlength="100" />
+    <h3 class="title">What's your password?</h3>
     <input class="loginInput" type="password" maxlength="30" />
   </div>
 
   <div class='login_button unselectable'> <div class='centered_text'> Login </div></div>
   <div class='register_button unselectable'><div class='centered_text'> Register</div></div>
 
-</li>
-  </ul>
-  <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-  <script src="/static/js/login.js"></script>
-</body>
-</html>
+  </li>
+</ul>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+<script src="/static/js/login.js"></script>
+{% endblock %}
