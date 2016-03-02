@@ -47,6 +47,7 @@ function setUsername () {
     $chatPage.show();
     $currentInput = $inputMessage.focus();
   }
+
 }
 
 // Sends a chat message
@@ -60,6 +61,9 @@ function sendMessage () {
               select_type: type_selected}
       $.post("send_message", data)
     }
+    updateChat();
+    updateUsers();
+    updateGroups();
   }
 }
 
@@ -318,6 +322,7 @@ $(document).ready(function(){
 //How often we update the chat
 window.setInterval(function(){
   updateChat();
+
 }, chat_int);
 
 //how often we update the users

@@ -235,6 +235,7 @@ def get_message():
     results = result_proxy.fetchall()
     out = []
     for result in reversed(results):
+        print(result)
         message_id = result[0]
         name = result[1]
         message = result[2]
