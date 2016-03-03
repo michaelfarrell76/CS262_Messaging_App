@@ -1,7 +1,7 @@
 # CS262_Messaging_App
 Messaging App for CS262 Assignment
 
-You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login). 
+You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login) (http://cs262chat.us-east-1.elasticbeanstalk.com/login). 
 
 If you want to run it locally and you want to use protocol buffers:
 
