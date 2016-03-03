@@ -267,14 +267,17 @@ console.log(useProto)
         console.log(users_out)
         users_out.reverse()
         $('.user_select').empty()
+        $('.user_select_modal').empty()
         for (var j = 0; j < users_out.length; j++) {
           var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
+          var option2 = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
           $(".user_select").append(option)
+          $('.user_select_modal').append(option2)
         }
       $('.ui.dropdown').dropdown({allowAdditions: false});  
       }
     }
-
+    
     data = {format:'json'}
     a = $.ajax({
       dataType: "json",
@@ -314,9 +317,13 @@ console.log(useProto)
         console.log(users_out)
         users_out.reverse()
         $('.user_select').empty()
+        $('.user_select_modal').empty()
         for (var j = 0; j < users_out.length; j++) {
           var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
+          var option2 = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
           $(".user_select").append(option)
+          $(".user_select_modal").append(option2)
+
         }
       $('.ui.dropdown').dropdown({allowAdditions: false});  
       }
@@ -354,16 +361,16 @@ function updateGroups(){
             else {
               break
             }
-          }
+          }$
           groups_out.reverse()
           $('.group_select').empty()
           for (var j = 0; j < groups_out.length; j++) {
+            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
             var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
             $(".group_select").append(option)
           }
         }
       }
-
       a = $.ajax({
         dataType: "json",
         url: "get_groups",
@@ -528,6 +535,8 @@ $window.keydown(function (event) {
 $(document).ready(function(){
   updateUsers();
   updateGroups();
+  $('#g_sel').select2();
+  $('#u_sel').select2();
 });
 
 //How often we update the chat
@@ -540,6 +549,8 @@ window.setInterval(function(){
 window.setInterval(function(){
   updateUsers();
   updateGroups();
+  $('#g_sel').select2();
+  $('#u_sel').select2();
 }, user_int);
 
 //Logout of account

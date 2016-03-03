@@ -1,15 +1,17 @@
 # CS262_Messaging_App
 Messaging App for CS262 Assignment
 
-Start using protocol buffers:
+You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login). 
+
+If you want to run it locally and you want to use protocol buffers:
 
 python application.py --protobuff
 
-Start using RESTFUL
+If you want to start using RESTFUL, run the following commands:
 
 python application.py 
 
-Can also be switched on the app
+There is also a toggle between RESTFUL and protocol buffers in the application itself. 
 
 # Setup
 - pip install flask

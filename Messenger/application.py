@@ -247,6 +247,10 @@ def get_message():
         other_user =  request.form['user_id']
         select_type =  request.form['select_type']
 
+    if USE_PROTOBUFF:
+        msgBuf = []
+    else:
+        out = []
     
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
@@ -267,12 +271,6 @@ def get_message():
     result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
     s.close()
     results = result_proxy.fetchall()
-   
-    if USE_PROTOBUFF:
-        msgBuf = []
-    else:
-        out = []
-
 
     for result in reversed(results):
         message_id = result[0]
@@ -290,7 +288,6 @@ def get_message():
     if USE_PROTOBUFF:
         PostMsgClient = message_pb2.PostMsgClient(messages = msgBuf)
         return base64.b64encode(PostMsgClient.SerializeToString())
-  
     else:
         return json.dumps(out)
 
