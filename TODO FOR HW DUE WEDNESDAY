@@ -5,6 +5,7 @@ General:
 	-tons to add about total structure
 	-Talk about how the folders interact and whats in each
 	-Templates/index.html: talk about why libraries are added
+	-js/ByteBufferAB.min.js, modal.js, protocode.js: readme about libraries
 -requirements.txt
 	-update to reflect current state
 -use pydocs?
@@ -40,9 +41,6 @@ MESSENGER:
 				-maybe add something to readme about css folder and what its for
 
 		js:
-			-ByteBufferAB.min.js, modal.js, protocode.js
-				-readme on why its used (if it even is being used)
-				-readme stuff
 			-main.js
 				-clean up
 				-add comments
