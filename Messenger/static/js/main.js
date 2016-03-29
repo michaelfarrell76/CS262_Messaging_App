@@ -9,6 +9,8 @@ var CHAT_INT = 1000; //interval to update chat
 var USER_INT = 5000; //interval to update usernames
 var DELETE_ERR_MESSAGE = "Are you sure you want to delete your account?\n\n This cannot be undone"
 var ENTER = 13; //value of enter key
+var USER = 0;
+var GROUP = 1;
 
 
 // Initialize tags
@@ -45,18 +47,15 @@ protojson.config(['$interpolateProvider', function($interpolateProvider) {
   $interpolateProvider.endSymbol(']}');
 }]);
 var ProtoBuf = dcodeIO.ProtoBuf;
-var MsgClient, GrpCreateClient, GrpUsrs, UsrClient, UsrUsrs, PreMsgClient, PostMsgClient, Msg;
+var builder = ProtoBuf.loadProtoFile("/static/message.proto");
+var MsgClient = builder.build("MsgClient");
+var Msg = builder.build("Msg");
+var PostMsgClient  = builder.build("PostMsgClient");
+var UsrGrp = builder.build("UsrGrp");
+var UsrGrpClient = builder.build("UsrGrpClient");
 
 
-builder = ProtoBuf.loadProtoFile("/static/message.proto");
-MsgClient = builder.build("MsgClient");
-GrpCreateClient = builder.build("GrpCreateClient");
-GrpUsrs = builder.build("GrpUsrs");
-UsrClient = builder.build("UsrClient");
-UsrUsrs = builder.build("UsrUsrs");
-PreMsgClient = builder.build("PreMsgClient");
-PostMsgClient  = builder.build("PostMsgClient");
-Msg = builder.build("Msg");
+
 
 //*********************END*****************************
 
@@ -74,9 +73,9 @@ function sendMessage () {
         //********************START******************************
         //change to be more efficient
         var data = new MsgClient({
-          message: message,
-          other_uid: cleanInput(currently_selected),
-          select_type:type_selected
+          id: int(cleanInput(currently_selected)),
+          chat_type: type_selected,
+          message: message
         });
 
         //change to alert that we failed
@@ -99,8 +98,8 @@ function sendMessage () {
         //********************START******************************
         //change to be more efficient
         var data = {message: message, 
-                    other_uid: cleanInput(currently_selected),
-                    select_type: type_selected}
+                    other_uid: parseInt(cleanInput(currently_selected)),
+                    select_type: type_selected};
         //*********************END*****************************
         $.post("send_message", data)
       }
@@ -189,9 +188,9 @@ function updateChat() {
     if (useProto){
       //********************START******************************
       //change to be more efficient
-      data = new PreMsgClient({
-        user_id: cleanInput(currently_selected),
-        select_type: type_selected
+      data = new MsgClient({
+        id: parseInt(cleanInput(currently_selected)),
+        chat_type: type_selected
       });
       
       
@@ -207,7 +206,7 @@ function updateChat() {
       //*********************END*****************************
     }
     else{
-      data = {user_id: cleanInput(currently_selected),
+      data = {user_id: parseInt(cleanInput(currently_selected)),
               select_type: type_selected}
 
       //********************START******************************
@@ -231,13 +230,13 @@ function updateChat() {
 function updateUsers(){
   success = function(users) {
     if (useProto){
-      var Usrmsg = UsrUsrs.decode(users);
-      users = Usrmsg.usrs;
+      var Usrmsg = UsrGrpClient.decode(users);
+      users = Usrmsg.members;
     }
 
     //********************START******************************
     //change to be more efficient
-    var second_index = useProto ? 'user_id' : 0 ;
+    var second_index = useProto ? 'id' : 0 ;
     //*********************END*****************************
 
     //If we see that we have more users than the global count
@@ -252,7 +251,7 @@ function updateUsers(){
         if (user[second_index] >= latest_user_id) {
           user_data = {};
           if (useProto){
-            user_data.user_id = user['user_id'];
+            user_data.user_id = user['id'];
             user_data.name = user['name'];
           }
           else{
@@ -309,12 +308,12 @@ function updateUsers(){
 function updateGroups(){
   success = function(groups) {
     if (useProto){
-      var Groupmsg = GrpUsrs.decode(groups);
-      groups = Groupmsg.grpClient;
+      var Groupmsg = UsrGrpClient.decode(groups);
+      groups = Groupmsg.members;
     }
     //********************START******************************
     //change to be more efficient
-    var second_index = useProto ? 'group_id' : 0 ;
+    var second_index = useProto ? 'id' : 0 ;
     //*********************END*****************************
     //If we see that we have more users than the global count
     if (groups.length > global_groups_count) {
@@ -329,7 +328,7 @@ function updateGroups(){
         if (group[second_index] >= latest_groups_id) {
           groups_data = {}
           if (useProto){
-            groups_data.group_id = group['group_id']
+            groups_data.group_id = group['id']
             groups_data.group_name = group['group_name']
           }
           else{
@@ -506,12 +505,12 @@ function updateInfo(id, type_sel, other_id){
 }
 //Update info when a new user is selected
 $('#u_sel').change(function(){ 
-  updateInfo('#u_sel', 'user', '#g_sel');
+  updateInfo('#u_sel', USER, '#g_sel');
 });
 
 //Update infor that new group is selected
 $('#g_sel').change(function(){ 
-  updateInfo('#g_sel', 'group', '#u_sel')
+  updateInfo('#g_sel', GROUP, '#u_sel')
 });
 
 //********************START******************************
@@ -522,8 +521,9 @@ $('.modalCreateButton').click(function (){
   $("#group_select>option:selected").removeAttr("selected");
   $('.ui.dropdown').dropdown('restore defaults'); 
   $('#group_name').val('')
-  data = {user_ids: values, group_name:name}
+  
   if (!useProto){
+    data = {user_ids: values, group_name:name}
       $.ajax({
         type: "POST",
         dataType: "json",
@@ -533,8 +533,9 @@ $('.modalCreateButton').click(function (){
        });
 
       }else{
+        data = {name:name, user_ids: values}
         console.log("using proto")
-        data_client = new GrpCreateClient(data);
+        data_client = new UsrGrp(data);
     
         success = function() {
           console.log("successful return")

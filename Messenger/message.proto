@@ -1,39 +1,38 @@
-message MsgClient {
-	required string message = 1; 
-	required string other_uid = 2;
-	required string select_type = 3;
-};
+package MessengerProtoBuff;
 
+//Used to differentiate between user chats and group chats
+enum SelectType {
+    USER = 0;
+    GROUP = 1;
+}
+
+//Package for a message object
 message Msg {
-	required string message = 1; 
-	required string message_id = 2;
-	required string name = 3;
+	required int32 message_id = 1; //id of message
+	required string name = 2; //name of user sending message
+	required string message = 3; //the message itself
 };
 
-message PreMsgClient {
-	required string user_id = 1; 
-	required string select_type = 2;
+//Client that is used to pass information about querying mesages from db
+message MsgClient {
+	required int32 id = 1; //either the userid requesting to send to or the current userid
+	required SelectType chat_type = 2 [default = USER]; //the type of chat
+	optional string message = 3;//Used when sending a message
 };
 
+//Package to pass a bundle of messages
 message PostMsgClient {
 	 repeated Msg messages = 1;
 };
 
-message UsrClient {
-	required string user_id = 1; 
-	required string name = 2;
+//Package to hold information about a user or group
+message UsrGrp {
+	required string name = 1; //username or groupname
+	optional int32 id = 2; //user_id or group_id
+	optional string user_ids = 3; //for groups, the list of users
 };
 
-message UsrUsrs {
-  repeated UsrClient usrs = 1;
-};
-
-message GrpCreateClient {
-	required string user_ids = 1; 
-	required string group_name = 2;
-	optional string group_id = 3;
-};
-
-message GrpUsrs {
-  repeated GrpCreateClient grpClient = 1;
+//Bundle of Users or Groups
+message UsrGrpClient {
+ 	repeated UsrGrp members = 1;
 };
