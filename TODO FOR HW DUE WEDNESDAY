@@ -7,6 +7,7 @@ General:
 	-Templates/index.html: talk about why libraries are added
 -requirements.txt
 	-update to reflect current state
+-use pydocs?
 
 MESSENGER:
 	-_init_.py, config.py:
