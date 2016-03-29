@@ -1,5 +1,7 @@
 """
-The flask application package.
+Used to initialize the flask application from a config file.
+Modularizes the application so it can be imported later in other parts
+of the application. 
 """
 
 from flask import Flask

@@ -3,26 +3,32 @@ Configures AWS
 Generates routes and views for the flask application.
 """
 
+# Module used for managing configuration and setup
 import os
 import sys
-import json
 import time
+
+# Used for parsing responses from the database
 import ast
-
 from datetime import datetime
-
-import flask
-from flask import request, Response, render_template, flash, redirect
-
 from sqlalchemy import exc
 import _mysql
 import sqlalchemy 
 from sqlalchemy.orm import sessionmaker, scoped_session
+
+# Modules used for managing flask requests and rendering templates
+import flask
+from flask import request, Response, render_template, flash, redirect
+import json
+
+# Modules used for authoentication of the user
 from auth.auth import User
 import flask.ext.login as flask_login
 from flask_login import LoginManager, current_user
 from werkzeug.security import generate_password_hash, \
      check_password_hash
+
+# Used for protobufs
 import message_pb2
 from protobuf_to_dict import protobuf_to_dict
 import base64
@@ -44,7 +50,7 @@ application.config.from_object('config')
 # Only enable Flask debugging if an env var is set to true
 application.debug = application.config['FLASK_DEBUG'] in ['true', 'True']
 
-# Not the most secure, but oh well
+# Setup of the database engine
 application.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://cs262admin:cs262project@messenger.c57b9wmfsuhp.us-east-1.rds.amazonaws.com/messenger'
 engine = sqlalchemy.create_engine(application.config['SQLALCHEMY_DATABASE_URI'])
 
@@ -56,6 +62,12 @@ login_manager.login_view = 'login'
 
 @login_manager.user_loader
 def user_loader(user_id):
+    """ 
+    This function is called every request to generate the user object from
+    the user_id stored in session. This follows the standard approach for the
+    flask-login module.
+    """
+
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result_proxy = s.execute('SELECT name, email FROM users WHERE id = "' + user_id + '" LIMIT 1')
@@ -70,6 +82,12 @@ def user_loader(user_id):
 
 @login_manager.request_loader
 def request_loader(request):
+    """ 
+    This function is called during every request to validate that the user is still
+    valid in the database. This enures that all users do not retain access if a user 
+    is deleted or a password has changed. 
+    """
+
     email = request.form.get('email')
     if email is not None:
         Session = scoped_session(sessionmaker(bind=engine))
@@ -91,6 +109,11 @@ def request_loader(request):
 @application.route('/')
 @flask_login.login_required
 def home():
+    """ 
+    This is the function that handles the route for the home page. It uses the Jinja engine
+    to render the index template. Beacuse authentication is required, we add a decorator 
+    indicating login_required. 
+    """
     global USE_PROTOBUFF 
 
     """Renders the chat page."""
@@ -103,7 +126,11 @@ def home():
 
 @application.route('/login', methods=['POST', 'GET'])
 def login():
-    """Renders the login page."""
+    """
+    This is the function that handles the route for the login page. Authentication is not 
+    required. The post method handles the logic for logging in and the get method renders 
+    the template. It uses the Jinja engine to render the index template.
+    """
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
@@ -140,6 +167,10 @@ def login():
 
 @application.route('/register', methods=['POST', 'GET'])
 def register():
+    """
+    This is the function that handles the route for the register page. It uses the Jinja engine
+    to render the index template. Authentication is not required.
+    """
     if request.method == 'POST':
         name = request.form['name']
         email = request.form['email']
@@ -176,6 +207,12 @@ def register():
 
 @application.route('/send_message', methods=['POST'])
 def send_message():
+    """
+    This endpoint is hit via an AJAX call whenever a message is sent. Depending on 
+    whether or not the USE_PROTOBUFF method is true, the message is parsed as JSON 
+    or as a protocol buffer. The only method available is POST. The resulting message
+    is then saved in a database.
+    """
     global USE_PROTOBUFF 
 
     if USE_PROTOBUFF:
@@ -232,6 +269,13 @@ def send_message():
 
 @application.route('/get_messages', methods=['POST'])
 def get_message():
+    """
+    This endpoint is hit via an AJAX POST call periodically at intervals specified
+    in the client. Depending on whether or not the USE_PROTOBUFF method
+    is true, the message is sent as JSON or as a protocol buffer. This method 
+    grabs all messages from the database that the user has permission to see. 
+    """
+
     global USE_PROTOBUFF 
 
     if USE_PROTOBUFF:
@@ -293,6 +337,13 @@ def get_message():
 
 @application.route('/get_users')
 def get_users():
+    """
+    This endpoint is hit via an AJAX POST request periodically at intervals specified 
+    in the client. Similar to before, depending on whether or not the USE_PROTOBUFF 
+    method is true, the message is sent as JSON or as a protocol buffer. This method 
+    grabs all messages from the database that the user has permission to see. 
+    """
+
     global USE_PROTOBUFF 
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
@@ -300,12 +351,10 @@ def get_users():
     s.close()
     results = result.fetchall()
 
-
     if USE_PROTOBUFF:
         usrUsrs = []
     else:
         out = []
- 
 
     for result in results:
         user_id = result[0]
@@ -328,6 +377,9 @@ def get_users():
 
 @application.route('/logout')
 def logout():
+    """
+    Endpoint that allows a user to logout. Logout buttons are linked this endpoint
+    """
     flask_login.logout_user()
     return redirect("login", code=302)
 
