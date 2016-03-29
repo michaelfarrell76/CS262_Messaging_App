@@ -3,7 +3,6 @@
 
 import sys
 _b=sys.version_info[0]<3 and (lambda x:x) or (lambda x:x.encode('latin1'))
-from google.protobuf.internal import enum_type_wrapper
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
@@ -18,14 +17,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='message.proto',
-  package='MessengerProtoBuff',
-  serialized_pb=_b('\n\rmessage.proto\x12\x12MessengerProtoBuff\"8\n\x03Msg\x12\x12\n\nmessage_id\x18\x01 \x02(\x05\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x0f\n\x07message\x18\x03 \x02(\t\"a\n\tMsgClient\x12\n\n\x02id\x18\x01 \x02(\x05\x12\x37\n\tchat_type\x18\x02 \x02(\x0e\x32\x1e.MessengerProtoBuff.SelectType:\x04USER\x12\x0f\n\x07message\x18\x03 \x01(\t\":\n\rPostMsgClient\x12)\n\x08messages\x18\x01 \x03(\x0b\x32\x17.MessengerProtoBuff.Msg\"4\n\x06UsrGrp\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x01(\x05\x12\x10\n\x08user_ids\x18\x03 \x01(\t\";\n\x0cUsrGrpClient\x12+\n\x07members\x18\x01 \x03(\x0b\x32\x1a.MessengerProtoBuff.UsrGrp*!\n\nSelectType\x12\x08\n\x04USER\x10\x00\x12\t\n\x05GROUP\x10\x01')
+  package='',
+  serialized_pb=_b('\n\rmessage.proto\"8\n\x03Msg\x12\x12\n\nmessage_id\x18\x01 \x02(\x05\x12\x0c\n\x04name\x18\x02 \x02(\t\x12\x0f\n\x07message\x18\x03 \x02(\t\"{\n\tMsgClient\x12\n\n\x02id\x18\x01 \x02(\x05\x12.\n\tchat_type\x18\x02 \x02(\x0e\x32\x15.MsgClient.SelectType:\x04USER\x12\x0f\n\x07message\x18\x03 \x01(\t\"!\n\nSelectType\x12\x08\n\x04USER\x10\x00\x12\t\n\x05GROUP\x10\x01\"\'\n\rPostMsgClient\x12\x16\n\x08messages\x18\x01 \x03(\x0b\x32\x04.Msg\"4\n\x06UsrGrp\x12\x0c\n\x04name\x18\x01 \x02(\t\x12\n\n\x02id\x18\x02 \x01(\x05\x12\x10\n\x08user_ids\x18\x03 \x01(\t\"(\n\x0cUsrGrpClient\x12\x18\n\x07members\x18\x01 \x03(\x0b\x32\x07.UsrGrp')
 )
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-_SELECTTYPE = _descriptor.EnumDescriptor(
+
+
+_MSGCLIENT_SELECTTYPE = _descriptor.EnumDescriptor(
   name='SelectType',
-  full_name='MessengerProtoBuff.SelectType',
+  full_name='MsgClient.SelectType',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -40,40 +41,35 @@ _SELECTTYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=369,
-  serialized_end=402,
+  serialized_start=165,
+  serialized_end=198,
 )
-_sym_db.RegisterEnumDescriptor(_SELECTTYPE)
-
-SelectType = enum_type_wrapper.EnumTypeWrapper(_SELECTTYPE)
-USER = 0
-GROUP = 1
-
+_sym_db.RegisterEnumDescriptor(_MSGCLIENT_SELECTTYPE)
 
 
 _MSG = _descriptor.Descriptor(
   name='Msg',
-  full_name='MessengerProtoBuff.Msg',
+  full_name='Msg',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='message_id', full_name='MessengerProtoBuff.Msg.message_id', index=0,
+      name='message_id', full_name='Msg.message_id', index=0,
       number=1, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='name', full_name='MessengerProtoBuff.Msg.name', index=1,
+      name='name', full_name='Msg.name', index=1,
       number=2, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='message', full_name='MessengerProtoBuff.Msg.message', index=2,
+      name='message', full_name='Msg.message', index=2,
       number=3, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -90,34 +86,34 @@ _MSG = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=37,
-  serialized_end=93,
+  serialized_start=17,
+  serialized_end=73,
 )
 
 
 _MSGCLIENT = _descriptor.Descriptor(
   name='MsgClient',
-  full_name='MessengerProtoBuff.MsgClient',
+  full_name='MsgClient',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='id', full_name='MessengerProtoBuff.MsgClient.id', index=0,
+      name='id', full_name='MsgClient.id', index=0,
       number=1, type=5, cpp_type=1, label=2,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='chat_type', full_name='MessengerProtoBuff.MsgClient.chat_type', index=1,
+      name='chat_type', full_name='MsgClient.chat_type', index=1,
       number=2, type=14, cpp_type=8, label=2,
       has_default_value=True, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='message', full_name='MessengerProtoBuff.MsgClient.message', index=2,
+      name='message', full_name='MsgClient.message', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -128,26 +124,27 @@ _MSGCLIENT = _descriptor.Descriptor(
   ],
   nested_types=[],
   enum_types=[
+    _MSGCLIENT_SELECTTYPE,
   ],
   options=None,
   is_extendable=False,
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=95,
-  serialized_end=192,
+  serialized_start=75,
+  serialized_end=198,
 )
 
 
 _POSTMSGCLIENT = _descriptor.Descriptor(
   name='PostMsgClient',
-  full_name='MessengerProtoBuff.PostMsgClient',
+  full_name='PostMsgClient',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='messages', full_name='MessengerProtoBuff.PostMsgClient.messages', index=0,
+      name='messages', full_name='PostMsgClient.messages', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -164,34 +161,34 @@ _POSTMSGCLIENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=194,
-  serialized_end=252,
+  serialized_start=200,
+  serialized_end=239,
 )
 
 
 _USRGRP = _descriptor.Descriptor(
   name='UsrGrp',
-  full_name='MessengerProtoBuff.UsrGrp',
+  full_name='UsrGrp',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='name', full_name='MessengerProtoBuff.UsrGrp.name', index=0,
+      name='name', full_name='UsrGrp.name', index=0,
       number=1, type=9, cpp_type=9, label=2,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='id', full_name='MessengerProtoBuff.UsrGrp.id', index=1,
+      name='id', full_name='UsrGrp.id', index=1,
       number=2, type=5, cpp_type=1, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None),
     _descriptor.FieldDescriptor(
-      name='user_ids', full_name='MessengerProtoBuff.UsrGrp.user_ids', index=2,
+      name='user_ids', full_name='UsrGrp.user_ids', index=2,
       number=3, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
@@ -208,20 +205,20 @@ _USRGRP = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=254,
-  serialized_end=306,
+  serialized_start=241,
+  serialized_end=293,
 )
 
 
 _USRGRPCLIENT = _descriptor.Descriptor(
   name='UsrGrpClient',
-  full_name='MessengerProtoBuff.UsrGrpClient',
+  full_name='UsrGrpClient',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='members', full_name='MessengerProtoBuff.UsrGrpClient.members', index=0,
+      name='members', full_name='UsrGrpClient.members', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -238,11 +235,12 @@ _USRGRPCLIENT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=308,
-  serialized_end=367,
+  serialized_start=295,
+  serialized_end=335,
 )
 
-_MSGCLIENT.fields_by_name['chat_type'].enum_type = _SELECTTYPE
+_MSGCLIENT.fields_by_name['chat_type'].enum_type = _MSGCLIENT_SELECTTYPE
+_MSGCLIENT_SELECTTYPE.containing_type = _MSGCLIENT
 _POSTMSGCLIENT.fields_by_name['messages'].message_type = _MSG
 _USRGRPCLIENT.fields_by_name['members'].message_type = _USRGRP
 DESCRIPTOR.message_types_by_name['Msg'] = _MSG
@@ -250,40 +248,39 @@ DESCRIPTOR.message_types_by_name['MsgClient'] = _MSGCLIENT
 DESCRIPTOR.message_types_by_name['PostMsgClient'] = _POSTMSGCLIENT
 DESCRIPTOR.message_types_by_name['UsrGrp'] = _USRGRP
 DESCRIPTOR.message_types_by_name['UsrGrpClient'] = _USRGRPCLIENT
-DESCRIPTOR.enum_types_by_name['SelectType'] = _SELECTTYPE
 
 Msg = _reflection.GeneratedProtocolMessageType('Msg', (_message.Message,), dict(
   DESCRIPTOR = _MSG,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:MessengerProtoBuff.Msg)
+  # @@protoc_insertion_point(class_scope:Msg)
   ))
 _sym_db.RegisterMessage(Msg)
 
 MsgClient = _reflection.GeneratedProtocolMessageType('MsgClient', (_message.Message,), dict(
   DESCRIPTOR = _MSGCLIENT,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:MessengerProtoBuff.MsgClient)
+  # @@protoc_insertion_point(class_scope:MsgClient)
   ))
 _sym_db.RegisterMessage(MsgClient)
 
 PostMsgClient = _reflection.GeneratedProtocolMessageType('PostMsgClient', (_message.Message,), dict(
   DESCRIPTOR = _POSTMSGCLIENT,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:MessengerProtoBuff.PostMsgClient)
+  # @@protoc_insertion_point(class_scope:PostMsgClient)
   ))
 _sym_db.RegisterMessage(PostMsgClient)
 
 UsrGrp = _reflection.GeneratedProtocolMessageType('UsrGrp', (_message.Message,), dict(
   DESCRIPTOR = _USRGRP,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:MessengerProtoBuff.UsrGrp)
+  # @@protoc_insertion_point(class_scope:UsrGrp)
   ))
 _sym_db.RegisterMessage(UsrGrp)
 
 UsrGrpClient = _reflection.GeneratedProtocolMessageType('UsrGrpClient', (_message.Message,), dict(
   DESCRIPTOR = _USRGRPCLIENT,
   __module__ = 'message_pb2'
-  # @@protoc_insertion_point(class_scope:MessengerProtoBuff.UsrGrpClient)
+  # @@protoc_insertion_point(class_scope:UsrGrpClient)
   ))
 _sym_db.RegisterMessage(UsrGrpClient)
 

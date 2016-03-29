@@ -6,6 +6,8 @@ General:
 	-Talk about how the folders interact and whats in each
 	-Templates/index.html: talk about why libraries are added
 	-js/ByteBufferAB.min.js, modal.js, protocode.js: readme about libraries
+	-MESSENGER/message.proto, message_pb2.py: document in readme
+	-js/main.js : document in readme
 -requirements.txt
 	-update to reflect current state
 -use pydocs?
@@ -16,11 +18,7 @@ MESSENGER:
 		-include what they do how they interact
 		-update so theyre used correctly
 		-include documentation on how the whole flask program works together (conceptually and filewise)
-	-message.proto and message_pb2.py 
-		-determine if needed in this folder or in other folder or both
-		-Docuement the generated message_pb2.py code
-		-update message.proto so that it is actually effecient 
-		-document in README the format of each buffer 
+	
 	-application.py
 		-clean code
 		-document use of libraries
@@ -39,19 +37,9 @@ MESSENGER:
 				-possibly comment the things we added
 				-maybe clean up if possible
 				-maybe add something to readme about css folder and what its for
-		js:
-			-main.js
-				-clean up
-				-add comments
-				-clean code
-				-detail protobuff stuff
-				-lots to do
 
-		-message.proto and message_pb2.py 
-			-determine if needed in this folder or in other folder or both
-			-Docuement the generated message_pb2.py code
-			-update message.proto so that it is actually effecient 
-			-document in README the format of each buffer 
+
+
 
 
 

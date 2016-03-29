@@ -1,3 +1,6 @@
+//Protocol Buffers used to send informations about messages, users and groups
+//between the server and the client. 
+
 //Package for a message object
 message Msg {
 	required int32 message_id = 1; //id of message

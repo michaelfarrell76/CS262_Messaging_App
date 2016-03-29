@@ -1,10 +1,5 @@
-package MessengerProtoBuff;
-
-//Used to differentiate between user chats and group chats
-enum SelectType {
-    USER = 0;
-    GROUP = 1;
-}
+//Protocol Buffers used to send informations about messages, users and groups
+//between the server and the client. 
 
 //Package for a message object
 message Msg {
@@ -15,6 +10,11 @@ message Msg {
 
 //Client that is used to pass information about querying mesages from db
 message MsgClient {
+	//Used to differentiate between user chats and group chats
+	enum SelectType {
+	    USER = 0;
+	    GROUP = 1;
+	}
 	required int32 id = 1; //either the userid requesting to send to or the current userid
 	required SelectType chat_type = 2 [default = USER]; //the type of chat
 	optional string message = 3;//Used when sending a message
