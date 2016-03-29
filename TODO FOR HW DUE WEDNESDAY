@@ -4,6 +4,7 @@ General:
 -README.MD
 	-tons to add about total structure
 	-Talk about how the folders interact and whats in each
+	-Templates/index.html: talk about why libraries are added
 -requirements.txt
 	-update to reflect current state
 
@@ -26,11 +27,6 @@ MESSENGER:
 		-document protobuff stuff
 		-comments
 
-	Templates:
-		-Index.html
-			-comment libraries imported 
-			-Possibly further documentation on these imports in README
-
 	auth:
 		-_init_.py, auth.py
 			-Hopefully kevins got this, should be quick
@@ -46,9 +42,6 @@ MESSENGER:
 			-ByteBufferAB.min.js, modal.js, protocode.js
 				-readme on why its used (if it even is being used)
 				-readme stuff
-			-login.js
-				-clean up a little bit
-				-add some comments 
 			-main.js
 				-clean up
 				-add comments
