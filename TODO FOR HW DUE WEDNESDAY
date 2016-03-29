@@ -1,0 +1,67 @@
+TODO
+
+General:
+-README.MD
+	-tons to add about total structure
+	-Talk about how the folders interact and whats in each
+-requirements.txt
+	-update to reflect current state
+
+MESSENGER:
+	-_init_.py, config.py:
+		-done by kevin
+		-include what they do how they interact
+		-update so theyre used correctly
+		-include documentation on how the whole flask program works together (conceptually and filewise)
+	-message.proto and message_pb2.py 
+		-determine if needed in this folder or in other folder or both
+		-Docuement the generated message_pb2.py code
+		-update message.proto so that it is actually effecient 
+		-document in README the format of each buffer 
+	-application.py
+		-clean code
+		-document use of libraries
+		-document flask stuff
+		-document json stuff
+		-document protobuff stuff
+		-comments
+
+	Templates:
+		-Index.html
+			-comment libraries imported 
+			-Possibly further documentation on these imports in README
+
+	auth:
+		-_init_.py, auth.py
+			-Hopefully kevins got this, should be quick
+
+	static:
+		content:
+			-style.css
+				-possibly comment the things we added
+				-maybe clean up if possible
+				-maybe add something to readme about css folder and what its for
+
+		js:
+			-ByteBufferAB.min.js, modal.js, protocode.js
+				-readme on why its used (if it even is being used)
+				-readme stuff
+			-login.js
+				-clean up a little bit
+				-add some comments 
+			-main.js
+				-clean up
+				-add comments
+				-clean code
+				-detail protobuff stuff
+				-lots to do
+
+		-message.proto and message_pb2.py 
+			-determine if needed in this folder or in other folder or both
+			-Docuement the generated message_pb2.py code
+			-update message.proto so that it is actually effecient 
+			-document in README the format of each buffer 
+
+
+
+

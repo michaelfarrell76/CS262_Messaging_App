@@ -1,24 +1,26 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Chat</title>
-  <link rel="stylesheet" href="/static/content/style.css">
+  <head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" href="/static/content/style.css">
 
-</head>
-<script>
-var USE_PROTOBUFF = '{{ USE_PROTOBUFF }}';
-</script>
+  </head>
+  <script>
+    var USE_PROTOBUFF = '{{ USE_PROTOBUFF }}';
+  </script>
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <ul class=flashes>
-    {% for message in messages %}
-      <li>{{ message }}</li>
-    {% endfor %}
-    </ul>
-  {% endif %}
-{% endwith %}
-{% block body %}{% endblock %}
+  {% with messages = get_flashed_messages() %}
+    {% if messages %}
+      <ul class=flashes>
+      {% for message in messages %}
+        <li>{{ message }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+
+  {% block body %}{% endblock %}
+</html>
 
 
