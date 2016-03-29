@@ -8,6 +8,7 @@ var COLORS = [
 var CHAT_INT = 1000; //interval to update chat
 var USER_INT = 5000; //interval to update usernames
 var DELETE_ERR_MESSAGE = "Are you sure you want to delete your account?\n\n This cannot be undone"
+var ENTER = 13; //value of enter key
 
 
 // Initialize tags
@@ -31,7 +32,6 @@ var type_selected = null;
 //idk
 var chat_name = null;
 var connected = false;
-var typing = false;
 var change_user = false;
 var username;
 var lastTypingTime;
@@ -70,7 +70,7 @@ function sendMessage () {
   if (type_selected != null){
     var message = cleanInput($inputMessage.val());
     if (message){
-      if (useProto){
+      if (useProto){ //Using protocol buffers
         //********************START******************************
         //change to be more efficient
         var data = new MsgClient({
@@ -83,7 +83,7 @@ function sendMessage () {
         failure = function() {
           console.log("Message Failed to Send")
         }
-        //*********************END*****************************
+        //get success and error to work
          $.ajax({
           type: "POST",
           beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
@@ -92,356 +92,292 @@ function sendMessage () {
           success: function(data) {console.log("Message Sent")},
           error: failure
         })
+         //*********************END*****************************
 
       }
-      else{
-        var data = {message:message, 
-              other_uid: cleanInput(currently_selected),
-              select_type: type_selected}
+      else{ //Using RESTFUL 
+        //********************START******************************
+        //change to be more efficient
+        var data = {message: message, 
+                    other_uid: cleanInput(currently_selected),
+                    select_type: type_selected}
+        //*********************END*****************************
         $.post("send_message", data)
       }
-      $inputMessage.val('');
 
+      //Clear the message input
+      $inputMessage.val('');
     }
     updateChat();
   }
 }
 
-//Update the chat screen
+//********************START******************************
+//add function definition
+//*********************END*****************************
 function updateChat() {
-  if (!useProto){
-    success = function(messages) {
-      var messages_len = messages.length
-      if(messages == ''){
-        newest_message_id = 0
-      }
-      else{
-        newest_message_id = messages[0][0]
-      }
-     
-      if(change_user){
-        $messages.empty();
-        global_latest_message_id = 0;
-      }
-      if (newest_message_id > global_latest_message_id) {
-        last_message_id = global_latest_message_id
-        global_latest_message_id = newest_message_id
-        messages_out = []
+  success = function(messages) {
+    //unpackage the messages if using Protocol buffers
+    if (useProto){
+      var msg = PostMsgClient.decode(messages);
+      messages = msg.messages;
+    }
 
-        for (var i = 0; i < messages_len; i++) { 
-          message = messages[i]
-          if ( message[0] > last_message_id) {
-            message_data = {}
-            message_data.latest_id = message[0]
-            message_data.username = message[1]
-            message_data.message = message[2] 
-            messages_out.push(message_data)
-          }
-          else {
-            break
-          }
-        }
+    //********************START******************************
+    //change to be more efficient
+    var second_index = useProto ? 'message_id' : 0 ;
+    //*********************END*****************************
 
-        messages_out.reverse()
-        for (var j = 0; j < messages_out.length; j++) {
-          addChatMessage(messages_out[j])
+    //determine the newest message id added
+    var newest_message_id;
+    if(messages == ''){
+      newest_message_id = 0;
+    }
+    else{
+      newest_message_id = messages[0][second_index];
+    }
+    //If we've chosen a new user, clear the messages currently there
+    if(change_user){
+      $messages.empty();
+      global_latest_message_id = 0;
+    }
+
+    //If we see new messages were added, append on the new messages
+    if (newest_message_id > global_latest_message_id) {
+      var last_message_id = global_latest_message_id;
+      global_latest_message_id = newest_message_id;
+      messages_out = [];
+
+      for (var i = 0; i < messages.length; i++) { 
+        message = messages[i];
+        //Only add if its a new message
+        if ( message[second_index] > last_message_id) {
+          message_data = {};
+          if (useProto){
+            message_data.latest_id = message['message_id'];
+            message_data.username = message['name'];
+            message_data.message = message['message'];
+          }
+          else{
+            message_data.latest_id = message[0];
+            message_data.username = message[1];
+            message_data.message = message[2];
+          }
+          messages_out.push(message_data)
+        }
+        else {
+          //We know there are no more new messages so we can exit the loop
+          break
         }
       }
-      if(change_user){
-        change_user = false;
+      
+      //Append the messages
+      messages_out.reverse();
+      for (var i = 0; i < messages_out.length; i++) {
+        addChatMessage(messages_out[i]);
       }
     }
-    if (currently_selected){
+    
+    //Finished changing user so set back to false
+    if(change_user){
+      change_user = false;
+    }
+  }
+
+  //Only get messages if a chat is selected
+  if (currently_selected){
+    if (useProto){
+      //********************START******************************
+      //change to be more efficient
+      data = new PreMsgClient({
+        user_id: cleanInput(currently_selected),
+        select_type: type_selected
+      });
+      
+      
+      //get success and error to work
+      $.ajax({
+        type: "POST",
+        url: "get_messages", 
+        responseType: 'arraybuffer',
+        data: {protoString: data.toBase64()}, 
+        success: success,
+        error: function(data){console.log('failure'); console.log('fed')}
+      })
+      //*********************END*****************************
+    }
+    else{
       data = {user_id: cleanInput(currently_selected),
               select_type: type_selected}
 
+      //********************START******************************
+      //get success and error to work
       $.ajax({
         type: "POST",
-        dataType: "json",
         url: 'get_messages',
+        dataType: "json",
         data: data,
         success: success
       });
-    }
-  }
-  else{
-    success = function(messages) {
-      var msg = PostMsgClient.decode(messages);
-       console.log(msg)
-       messages = msg.messages;
-      var messages_len = messages.length
-      if(messages == ''){
-        newest_message_id = 0
-      }
-      else{
-        newest_message_id = messages[0]['message_id']
-      }
-     
-      if(change_user){
-        $messages.empty();
-        global_latest_message_id = 0;
-      }
-      if (newest_message_id > global_latest_message_id) {
-        last_message_id = global_latest_message_id
-        global_latest_message_id = newest_message_id
-        messages_out = []
-
-        for (var i = 0; i < messages_len; i++) { 
-          message = messages[i]
-          if ( message['message_id'] > last_message_id) {
-            message_data = {}
-            message_data.latest_id = message['message_id']
-            message_data.username = message['name']
-            message_data.message = message['message'] 
-            messages_out.push(message_data)
-          }
-          else {
-            break
-          }
-        }
-
-        messages_out.reverse()
-        for (var j = 0; j < messages_out.length; j++) {
-          addChatMessage(messages_out[j])
-        }
-      }
-      if(change_user){
-        change_user = false;
-      }
-    }
-    if (currently_selected){
-        data = new PreMsgClient({
-          user_id: cleanInput(currently_selected),
-          select_type: type_selected
-        });
-        
-         $.ajax({
-          type: "POST",
-          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
-          url: "get_messages", 
-          responseType: 'arraybuffer',
-          data: {protoString: data.toBase64()}, 
-          success: success,
-          error: function(data){console.log('failure'); console.log('fed')}
-        })
-
+      //*********************END*****************************
     }
   }
 }
 
+//********************START******************************
+//add function definition
+//note function doesnt update if user drops out
+//*********************END*****************************
 function updateUsers(){
-console.log(useProto)
-  if (!useProto){
-
-    success = function(users) {
-
-      var num_users = users.length
-      
-      if (num_users > global_user_count) {
-        console.log(global_user_count)
-        global_user_count = num_users
-        latest_user_id = users[0][0]
-        users_out = []
-        console.log(num_users)
-        for (var i = 0; i < num_users; i++) { 
-          console.log(latest_user_id)
-          user = users[i]
-          if (user[0] >= latest_user_id) {
-            user_data = {}
-            user_data.user_id = user[0]
-            user_data.name = user[1]
-            user_data.email = user[2] 
-            user_data.group_id = user[3]
-            users_out.push(user_data)
-          }
-          else {
-            break
-          }
-        }
-        console.log(users_out)
-        users_out.reverse()
-        $('.user_select').empty()
-        $('.user_select_modal').empty()
-        for (var j = 0; j < users_out.length; j++) {
-          var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
-          var option2 = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
-          $(".user_select").append(option)
-          $('.user_select_modal').append(option2)
-        }
-      $('.ui.dropdown').dropdown({allowAdditions: false});  
-      }
+  success = function(users) {
+    if (useProto){
+      var Usrmsg = UsrUsrs.decode(users);
+      users = Usrmsg.usrs;
     }
-    
-    data = {format:'json'}
-    a = $.ajax({
-      dataType: "json",
+
+    //********************START******************************
+    //change to be more efficient
+    var second_index = useProto ? 'user_id' : 0 ;
+    //*********************END*****************************
+
+    //If we see that we have more users than the global count
+    if (users.length > global_user_count) {
+      global_user_count = users.length;
+      latest_user_id = users[0][second_index];
+      users_out = [];
+
+      for (var i = 0; i < users.length; i++) { 
+        user = users[i];
+        //add if id is greater than the last one added
+        if (user[second_index] >= latest_user_id) {
+          user_data = {};
+          if (useProto){
+            user_data.user_id = user['user_id'];
+            user_data.name = user['name'];
+          }
+          else{
+            user_data.user_id = user[0];
+            user_data.name = user[1];
+          }          
+          users_out.push(user_data);
+        }
+        else {
+          //We've found users we've already added so we don't need to re-add them
+          break;
+        }
+      }
+
+      //Empty users and add new one
+      users_out.reverse();
+      $('.user_select').empty();
+      $('.user_select_modal').empty();
+      for (var i = 0; i < users_out.length; i++) {
+        var option = $('<option></option>').attr("value", users_out[i].user_id).text(users_out[i].name);
+        var option2 = $('<option></option>').attr("value", users_out[i].user_id).text(users_out[i].name);
+        $(".user_select").append(option);
+        $('.user_select_modal').append(option2);
+      }
+      $('.ui.dropdown').dropdown({allowAdditions: false});  
+    }
+  }
+
+  //********************START******************************
+  //get success and error to work
+  if (useProto){
+    $.ajax({
       url: "get_users",
-      data: data,
-      success: success
+      success: success,
+      responseType: 'arraybuffer',
+      error: function(data){console.log('fed')}
     });
   }
   else{
-    success = function(users) {
-         var msg = UsrUsrs.decode(users);
-         console.log(msg)
-         users = msg.usrs;
-     
-        
-          var num_users = users.length
-      
-      if (num_users > global_user_count) {
-        console.log(global_user_count)
-        global_user_count = num_users
-        latest_user_id = users[0]['user_id']
-        users_out = []
-        console.log(num_users)
-        for (var i = 0; i < num_users; i++) { 
-          console.log(latest_user_id)
-          user = users[i]
-          if (user['user_id'] >= latest_user_id) {
-            user_data = {}
-            user_data.user_id = user['user_id']
-            user_data.name = user['name']
-            users_out.push(user_data)
-          }
-          else {
-            break
-          }
-        }
-        console.log(users_out)
-        users_out.reverse()
-        $('.user_select').empty()
-        $('.user_select_modal').empty()
-        for (var j = 0; j < users_out.length; j++) {
-          var option = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
-          var option2 = $('<option></option>').attr("value", users_out[j].user_id).text(users_out[j].name);
-          $(".user_select").append(option)
-          $(".user_select_modal").append(option2)
-
-        }
-      $('.ui.dropdown').dropdown({allowAdditions: false});  
-      }
-
-       }  
-      a = $.ajax({
-        url: "get_users",
-        success: success,
-        responseType: 'arraybuffer',
-        error: function(data){console.log('fed')}
-      });
+    $.ajax({
+      dataType: "json",
+      url: "get_users",
+      data: {format:'json'},
+      success: success
+    });
   }
+  //*********************END*****************************
 }
 
+//********************START******************************
+//add function definition
+//note function doesnt update if user drops out
+//*********************END*****************************
 function updateGroups(){
-    if (!useProto){
+  success = function(groups) {
+    if (useProto){
+      var Groupmsg = GrpUsrs.decode(groups);
+      groups = Groupmsg.grpClient;
+    }
+    //********************START******************************
+    //change to be more efficient
+    var second_index = useProto ? 'group_id' : 0 ;
+    //*********************END*****************************
+    //If we see that we have more users than the global count
+    if (groups.length > global_groups_count) {
+      
+      global_groups_count = groups.length
+      latest_groups_id = groups[0][second_index]
+      groups_out = []
 
-      success = function(groups) {
-        var num_groups = groups.length
-        
-        if (num_groups > global_groups_count) {
-          global_groups_count = num_groups
-          latest_groups_id = groups[0][0]
-          groups_out = []
-          for (var i = 0; i < num_groups; i++) { 
-            group = groups[i]
-            if (group[0] >= latest_groups_id) {
-              groups_data = {}
-              groups_data.group_id = group[0]
-              console.log(group[2])
-              groups_data.group_name = group[1]
-              groups_data.user_ids = group[2] 
-              groups_out.push(groups_data)
-            }
-            else {
-              break
-            }
-          }$
-          groups_out.reverse()
-          $('.group_select').empty()
-          for (var j = 0; j < groups_out.length; j++) {
-            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
-            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
-            $(".group_select").append(option)
+      for (var i = 0; i < groups.length; i++) { 
+        group = groups[i]
+        //add if id is greater than the last one added
+        if (group[second_index] >= latest_groups_id) {
+          groups_data = {}
+          if (useProto){
+            groups_data.group_id = group['group_id']
+            groups_data.group_name = group['group_name']
           }
+          else{
+            groups_data.group_id = group[0]
+            groups_data.group_name = group[1]
+          }
+          groups_out.push(groups_data)
+        }
+        else {
+          //We've found users we've already added so we don't need to re-add them
+          break
         }
       }
-      a = $.ajax({
-        dataType: "json",
-        url: "get_groups",
-        data: {format:'json'},
-        success: success,
-        error: function(data){console.log()}
-      });
+      //Empty groups and add new one
+      groups_out.reverse()
+      $('.group_select').empty()
+      for (var i = 0; i < groups_out.length; i++) {
+        var option = $('<option></option>').attr("value", groups_out[i].group_id).text(groups_out[i].group_name);
+        $(".group_select").append(option)
+      }
     }
-    else{
-       success = function(groups) {
-         var msg = GrpUsrs.decode(groups);
-         console.log(msg)
-         groups = msg.grpClient;
-         console.log(groups)
-         console.log(groups.length)
+  } 
 
-         var num_groups = groups.length
-
-         console.log()
-        
-        if (num_groups > global_groups_count) {
-          global_groups_count = num_groups
-          latest_groups_id = groups[0]['group_id']
-          groups_out = []
-          for (var i = 0; i < num_groups; i++) { 
-            group = groups[i]
-            if (group['group_id'] >= latest_groups_id) {
-              groups_data = {}
-              groups_data.group_id = group['group_id']
-              groups_data.group_name = group['group_name']
-              groups_data.user_ids = group['user_ids']
-              groups_out.push(groups_data)
-            }
-            else {
-              break
-            }
-          }
-          groups_out.reverse()
-          $('.group_select').empty()
-          for (var j = 0; j < groups_out.length; j++) {
-            var option = $('<option></option>').attr("value", groups_out[j].group_id).text(groups_out[j].group_name);
-            $(".group_select").append(option)
-          }
-        }
-
-       }  
-      a = $.ajax({
-        url: "get_groups",
-        success: success,
-        responseType: 'arraybuffer',
-        error: function(data){console.log('fed')}
-      });
-    }
-    
-
-
-
+  //********************START******************************
+  //get success and error to work
+  if (useProto){
+    $.ajax({
+      url: "get_groups",
+      success: success,
+      responseType: 'arraybuffer',
+      error: function(data){console.log('fed')}
+    });
+  }
+  else{
+    $.ajax({
+      dataType: "json",
+      url: "get_groups",
+      data: {format:'json'},
+      success: success
+    });
+  }
+  //*********************END*****************************
 }
 
-// Sets the client's username
-function setUsername () {
-  // username = cleanInput($usernameInput.val().trim());
-  // // If the username is valid
-  // if (username) {
-  //   $chatPage.show();
-  //   $currentInput = $inputMessage.focus();
-  // }
-
-}
-
-// Log a message
-function log (message, options) {
-  var $el = $('<li>').addClass('log').text(message);
-  addMessageElement($el, options);
-}
-
+//********************START******************************
+//add function definition
 // Adds the visual chat message to the message list
+//*********************END*****************************
 function addChatMessage (data, options) {
   // Don't fade the message in if there is an 'X was typing'
   var $typingMessages = getTypingMessages(data);
@@ -466,11 +402,15 @@ function addChatMessage (data, options) {
   addMessageElement($messageDiv, options);
 }
 
+
+//********************START******************************
+//add function definition
 // Adds a message element to the messages and scrolls to the bottom
 // el - The element to add as a message
 // options.fade - If the element should fade-in (default = true)
 // options.prepend - If the element should prepend
 //   all other messages (default = false)
+//*********************END*****************************
 function addMessageElement (el, options) {
   var $el = $(el);
 
@@ -521,47 +461,24 @@ function getUsernameColor (username) {
   return COLORS[index];
 }
 
-// Keyboard events
+//Send the message when the user hits enter and a chat box is selected
 $window.keydown(function (event) {
-
   // When the client hits ENTER on their keyboard
-  if (event.which === 13) {
-    if (username) {
-      sendMessage();
-      typing = false;
-    } else {
-      setUsername();
-    }
-  }
+  if (event.which === ENTER && type_selected != null){
+    sendMessage();
+  } 
 });
 
-// run coder once as soon as everything is ready
-$(document).ready(function(){
-
+//Function that calls all updates that are needed in once call 
+function updateAll(){
   updateUsers();
   updateGroups();
   $('#g_sel').select2();
   $('#u_sel').select2();
-});
-
-//How often we update the chat
-window.setInterval(function(){
-  updateChat();
-
-}, CHAT_INT);
-
-//how often we update the users
-window.setInterval(function(){
-  updateUsers();
-  updateGroups();
-  $('#g_sel').select2();
-  $('#u_sel').select2();
-}, USER_INT);
+}
 
 //Logout of account
-$("#logout").click(function () {
-    location.href = "/logout";
-});
+$("#logout").click(function () {location.href = "/logout";});
 
 //Delete account
 $("#delete_account").click(function() {
@@ -570,40 +487,34 @@ $("#delete_account").click(function() {
   }
 });
 
+//Button that allows the user to switch between RESTFUL and ProtoBuffs
 $("#transfer").click(function() {
-
-    location.href = "/transfer"; 
-
+  location.href = "/transfer"; 
 });
 
-
-//Update infor that new user is selected
-$('#u_sel').change(function(){ 
-  type_selected = 'user';
-  var chat_name = $('#u_sel option:selected').text();
+//Function that updates the information and notifies that we selected a new chat
+function updateInfo(id, type_sel, other_id){
+  //find out who you are currently chatting and display the name
+  var chat_name = $(id + ' option:selected').text();
   $('.center').replaceWith("<div class='center'>" + chat_name  + "</div>");
-  currently_selected = $(this).val();
+  $(other_id + ' option').removeAttr("selected");
+
+  //update globals
+  type_selected = type_sel
+  currently_selected = $(id).val();
   change_user = true;
-   $('#g_sel option').removeAttr("selected");
+}
+//Update info when a new user is selected
+$('#u_sel').change(function(){ 
+  updateInfo('#u_sel', 'user', '#g_sel');
 });
 
 //Update infor that new group is selected
 $('#g_sel').change(function(){ 
-  type_selected = 'group';
-  chat_name = $('#g_sel option:selected').text();
-  $('.center').replaceWith("<div class='center'>" + chat_name  + "</div>");
-  currently_selected = $(this).val();
-  change_user = true;
-   $('#u_sel option').removeAttr("selected");
-});
-    
-//Send messsage on enter
-$inputMessage.keydown(function (e) {
-  if (e.keyCode == 13){
-    sendMessage()
-  }
+  updateInfo('#g_sel', 'group', '#u_sel')
 });
 
+//********************START******************************
 $('.modalCreateButton').click(function (){
   var values = $("#group_select>option:selected").map(function() { return parseInt($(this).val()); });
   var name = cleanInput($("#group_name").val())
@@ -638,4 +549,14 @@ $('.modalCreateButton').click(function (){
         })
       }
 })
+//*********************END*****************************
+
+//When the document is ready, update 
+$(document).ready(updateAll());
+
+//How often we update the chat
+window.setInterval(updateChat, CHAT_INT);
+
+//how often we update the users/groups
+window.setInterval(updateAll, USER_INT);
 
