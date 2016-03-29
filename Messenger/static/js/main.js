@@ -1,41 +1,42 @@
+//Global constants
 var FADE_TIME = 150; // ms
-var TYPING_TIMER_LENGTH = 400; // ms
-var global_latest_message_id = 0;
-var global_user_count = 0
-var global_groups_count = 0
 var COLORS = [
   '#e21400', '#91580f', '#f8a700', '#f78b00',
   '#58dc00', '#287b00', '#a8f07a', '#4ae8c4',
   '#3b88eb', '#3824aa', '#a700ff', '#d300e7'
-];
+]; //the colors for the various usernames
+var CHAT_INT = 1000; //interval to update chat
+var USER_INT = 5000; //interval to update usernames
+var DELETE_ERR_MESSAGE = "Are you sure you want to delete your account?\n\n This cannot be undone"
 
-// Initialize variables
+
+// Initialize tags
 var $window = $(window);
-var $usernameInput = $('.usernameInput'); // Input for username
-var $currentInput = $usernameInput.focus();
-var $messages = $('.messages'); // Messages area
 var $inputMessage = $('.inputMessage'); // Input message input box
+var $messages = $('.messages'); // Messages area
 var $chatPage = $('.chat.page'); // The chatroom page
+$inputMessage.focus();
+$chatPage.show();
 
-var delete_err_msg = "Are you sure you want to delete your account?\n\n This cannot be undone"
-
-//intervals for updating chat and users
-var chat_int = 1000;
-var user_int = 5000;
-
-// Prompt for setting a username
-var username;
-var lastTypingTime;
+//Initialize global variables
+var global_latest_message_id = 0; //the last message id receieved 
+var global_user_count = 0 //the number of users
+var global_groups_count = 0 //the number of groups
 var currently_selected = null; //id currently interacting with
+
+//********************START OF AREA THAT NEEDS TO BE CLEANED******************************
+//change to binary 0 1
 var type_selected = null; 
+
+//idk
 var chat_name = null;
 var connected = false;
 var typing = false;
 var change_user = false;
+var username;
+var lastTypingTime;
 
 var useProto = (USE_PROTOBUFF === "True");
-console.log(useProto);
-console.log(true)
 
 // Some Proto Code
 var protojson = angular.module('protojson', []);
@@ -57,59 +58,52 @@ PreMsgClient = builder.build("PreMsgClient");
 PostMsgClient  = builder.build("PostMsgClient");
 Msg = builder.build("Msg");
 
+//*********************END*****************************
 
-$chatPage.show();
-$currentInput = $inputMessage.focus();
 
-// Sets the client's username
-function setUsername () {
-  // username = cleanInput($usernameInput.val().trim());
-  // // If the username is valid
-  // if (username) {
-  //   $chatPage.show();
-  //   $currentInput = $inputMessage.focus();
-  // }
 
-}
-
-// Sends a chat message
+//********************START******************************
+//add function definition
+//*********************END*****************************
 function sendMessage () {
+  //Only send a message if a chat instance is selected
   if (type_selected != null){
     var message = cleanInput($inputMessage.val());
-    if (message) {
-      $inputMessage.val('');
-      var data;
-
-      if (!useProto){
-        data = {message:message, 
-              other_uid: cleanInput(currently_selected),
-              select_type: type_selected}
-      $.post("send_message", data)
-      }else{
-        console.log("using proto")
-        data = new MsgClient({
+    if (message){
+      if (useProto){
+        //********************START******************************
+        //change to be more efficient
+        var data = new MsgClient({
           message: message,
           other_uid: cleanInput(currently_selected),
           select_type:type_selected
         });
-        console.log(data.encode())
-        success = function() {
-          console.log("successful return")
+
+        //change to alert that we failed
+        failure = function() {
+          console.log("Message Failed to Send")
         }
+        //*********************END*****************************
          $.ajax({
           type: "POST",
           beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
           url: "send_message", 
           data: {protoString: data.toBase64()}, 
-          success: success,
-          error: function(data){console.log('failure'); console.log(data)}
+          success: function(data) {console.log("Message Sent")},
+          error: failure
         })
+
       }
+      else{
+        var data = {message:message, 
+              other_uid: cleanInput(currently_selected),
+              select_type: type_selected}
+        $.post("send_message", data)
+      }
+      $inputMessage.val('');
 
     }
     updateChat();
-    updateUsers();
-    updateGroups();
   }
 }
 
@@ -430,6 +424,16 @@ function updateGroups(){
 
 }
 
+// Sets the client's username
+function setUsername () {
+  // username = cleanInput($usernameInput.val().trim());
+  // // If the username is valid
+  // if (username) {
+  //   $chatPage.show();
+  //   $currentInput = $inputMessage.focus();
+  // }
+
+}
 
 // Log a message
 function log (message, options) {
@@ -533,6 +537,7 @@ $window.keydown(function (event) {
 
 // run coder once as soon as everything is ready
 $(document).ready(function(){
+
   updateUsers();
   updateGroups();
   $('#g_sel').select2();
@@ -543,7 +548,7 @@ $(document).ready(function(){
 window.setInterval(function(){
   updateChat();
 
-}, chat_int);
+}, CHAT_INT);
 
 //how often we update the users
 window.setInterval(function(){
@@ -551,7 +556,7 @@ window.setInterval(function(){
   updateGroups();
   $('#g_sel').select2();
   $('#u_sel').select2();
-}, user_int);
+}, USER_INT);
 
 //Logout of account
 $("#logout").click(function () {
@@ -560,7 +565,7 @@ $("#logout").click(function () {
 
 //Delete account
 $("#delete_account").click(function() {
-  if (window.confirm(delete_err_msg)) {
+  if (window.confirm(DELETE_ERR_MESSAGE)) {
     location.href = "/delete_account"; 
   }
 });
@@ -575,7 +580,7 @@ $("#transfer").click(function() {
 //Update infor that new user is selected
 $('#u_sel').change(function(){ 
   type_selected = 'user';
-  chat_name = $('#u_sel option:selected').text();
+  var chat_name = $('#u_sel option:selected').text();
   $('.center').replaceWith("<div class='center'>" + chat_name  + "</div>");
   currently_selected = $(this).val();
   change_user = true;
