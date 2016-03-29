@@ -223,7 +223,7 @@ def send_message():
         result = base64.b64decode(request.form['protoString'])
         MsgClient.ParseFromString(result)
 
-        other_id = MsgClient.id
+        other_id = str(MsgClient.id)
         message = MsgClient.message
         select_type = MsgClient.chat_type
 
@@ -409,7 +409,7 @@ def create_group():
             name = GrpCreateClient.name
             user_ids = GrpCreateClient.user_ids
         else:
-            name = request.form['group_name']
+            name = request.form['name']
             user_ids = request.form['user_ids']
        
        

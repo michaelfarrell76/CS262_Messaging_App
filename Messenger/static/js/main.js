@@ -1,3 +1,13 @@
+/*!
+ * This is the main javascript file for the chat application
+ * It contains support for the itmes on the main index page which
+ * mainly just communicates with the server and constantly refreshes 
+ * the users, groups and messages to reflect the current information. 
+ *
+ * The code is broken mainly into two parts, one for sending information using REST
+ * and the other is sending information using Googles Protocol buffers 
+ */
+
 //Global constants
 var FADE_TIME = 150; // ms
 var COLORS = [
@@ -9,9 +19,10 @@ var CHAT_INT = 1000; //interval to update chat
 var USER_INT = 5000; //interval to update usernames
 var DELETE_ERR_MESSAGE = "Are you sure you want to delete your account?\n\n This cannot be undone"
 var ENTER = 13; //value of enter key
-var USER = 0;
-var GROUP = 1;
 
+//used to differentiate the type of chat
+var USER = 0; 
+var GROUP = 1;
 
 // Initialize tags
 var $window = $(window);
@@ -26,83 +37,77 @@ var global_latest_message_id = 0; //the last message id receieved
 var global_user_count = 0 //the number of users
 var global_groups_count = 0 //the number of groups
 var currently_selected = null; //id currently interacting with
+var type_selected = null; //either USER or GROUP to reflect the type of chat
+var change_user = false; //when true, indicates that we need to load in fresh messages
+var message_load_error = false; //indicate we haven't alerted yet about failing to load messages
+var usr_grp_load_error = false; //indicate we haven't alerted yet about failing to load users/groups
 
-//********************START OF AREA THAT NEEDS TO BE CLEANED******************************
-//change to binary 0 1
-var type_selected = null; 
+//Defining the current protocol we'll be using
+var useProto = (USE_PROTOBUFF === "True"); 
 
-//idk
-var chat_name = null;
-var connected = false;
-var change_user = false;
-var username;
-var lastTypingTime;
+var MsgClient, Msg, PostMsgClient, UsrGrp, UsrGrpClient;
+if(useProto){
+  //Setting up Protocol Buffers
+  var protojson = angular.module('protojson', []);
+  protojson.config(['$interpolateProvider', function($interpolateProvider) {
+    $interpolateProvider.startSymbol('{[');
+    $interpolateProvider.endSymbol(']}');
+  }]);
+  var ProtoBuf = dcodeIO.ProtoBuf;
 
-var useProto = (USE_PROTOBUFF === "True");
+  //Location of proto file
+  var builder = ProtoBuf.loadProtoFile("/static/message.proto");
 
-// Some Proto Code
-var protojson = angular.module('protojson', []);
-protojson.config(['$interpolateProvider', function($interpolateProvider) {
-  $interpolateProvider.startSymbol('{[');
-  $interpolateProvider.endSymbol(']}');
-}]);
-var ProtoBuf = dcodeIO.ProtoBuf;
-var builder = ProtoBuf.loadProtoFile("/static/message.proto");
-var MsgClient = builder.build("MsgClient");
-var Msg = builder.build("Msg");
-var PostMsgClient  = builder.build("PostMsgClient");
-var UsrGrp = builder.build("UsrGrp");
-var UsrGrpClient = builder.build("UsrGrpClient");
+  //Build message objects
+  MsgClient = builder.build("MsgClient");
+  Msg = builder.build("Msg");
+  PostMsgClient  = builder.build("PostMsgClient");
+  UsrGrp = builder.build("UsrGrp");
+  UsrGrpClient = builder.build("UsrGrpClient");
+}
 
-
-
-
-//*********************END*****************************
-
-
-
-//********************START******************************
-//add function definition
-//*********************END*****************************
+/*!
+ * This function takes in the message from the chat box and 
+ * sends the message to the FLASK server using either RESTFUL or protocol buffers 
+ * The result of the function is logged to the console and an alert
+ * message is thrown if the message failed to send
+ */
 function sendMessage () {
   //Only send a message if a chat instance is selected
   if (type_selected != null){
     var message = cleanInput($inputMessage.val());
     if (message){
       if (useProto){ //Using protocol buffers
-        //********************START******************************
-        //change to be more efficient
         var data = new MsgClient({
-          id: int(cleanInput(currently_selected)),
+          id: parseInt(cleanInput(currently_selected)),
           chat_type: type_selected,
           message: message
         });
 
-        //change to alert that we failed
-        failure = function() {
-          console.log("Message Failed to Send")
-        }
-        //get success and error to work
-         $.ajax({
-          type: "POST",
-          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
-          url: "send_message", 
-          data: {protoString: data.toBase64()}, 
-          success: function(data) {console.log("Message Sent")},
-          error: failure
-        })
-         //*********************END*****************************
-
+        data = {protoString: data.toBase64()}
       }
       else{ //Using RESTFUL 
-        //********************START******************************
-        //change to be more efficient
         var data = {message: message, 
                     other_uid: parseInt(cleanInput(currently_selected)),
                     select_type: type_selected};
-        //*********************END*****************************
-        $.post("send_message", data)
       }
+
+      failure = function() {
+        console.log("Message Failed to Send");
+        alert('Message Failed to Send');
+      }
+      success = function (){
+        console.log("Message Sent");
+      }
+
+      //Send message to server
+      $.ajax({
+          type: "POST",
+          url: "send_message", 
+          data: data, 
+          success: success,
+          error: failure
+        })
 
       //Clear the message input
       $inputMessage.val('');
@@ -111,10 +116,16 @@ function sendMessage () {
   }
 }
 
-//********************START******************************
-//add function definition
-//*********************END*****************************
+/*!
+ * This function makes a post request to the server in order to update the current
+ * chat. This function will use either RESTFUL or Protocol buffers to generate
+ * a package containing the requested information, and it should return a package
+ * containing the messages to display on success, and alerts the failed message fetch
+ * on error.
+ */
 function updateChat() {
+
+  //If messages successfully fetched, display them
   success = function(messages) {
     //unpackage the messages if using Protocol buffers
     if (useProto){
@@ -122,10 +133,7 @@ function updateChat() {
       messages = msg.messages;
     }
 
-    //********************START******************************
-    //change to be more efficient
     var second_index = useProto ? 'message_id' : 0 ;
-    //*********************END*****************************
 
     //determine the newest message id added
     var newest_message_id;
@@ -135,6 +143,7 @@ function updateChat() {
     else{
       newest_message_id = messages[0][second_index];
     }
+
     //If we've chosen a new user, clear the messages currently there
     if(change_user){
       $messages.empty();
@@ -183,61 +192,71 @@ function updateChat() {
     }
   }
 
+  //if messages failed to load, log and alert if first time
+  failure = function() {
+    console.log("Failed to load messages");
+
+    //If we have not thrown an alert yet, notify user that we cannot load messages
+    if (!message_load_error){
+      alert('Failed to load messages');
+      message_load_error = true;
+    }
+  }
+
   //Only get messages if a chat is selected
   if (currently_selected){
+    //bundle requests and send the user id of the person we are looking for
     if (useProto){
-      //********************START******************************
-      //change to be more efficient
       data = new MsgClient({
         id: parseInt(cleanInput(currently_selected)),
         chat_type: type_selected
       });
-      
-      
-      //get success and error to work
+      data = {protoString: data.toBase64()}
+
+      //send request to server
       $.ajax({
         type: "POST",
         url: "get_messages", 
         responseType: 'arraybuffer',
-        data: {protoString: data.toBase64()}, 
+        data: data, 
         success: success,
-        error: function(data){console.log('failure'); console.log('fed')}
+        error: failure
       })
-      //*********************END*****************************
     }
     else{
       data = {user_id: parseInt(cleanInput(currently_selected)),
               select_type: type_selected}
 
-      //********************START******************************
-      //get success and error to work
+      //send request to server
       $.ajax({
         type: "POST",
-        url: 'get_messages',
-        dataType: "json",
-        data: data,
-        success: success
-      });
-      //*********************END*****************************
-    }
+        url: "get_messages", 
+        dataType: 'json',
+        data: data, 
+        success: success,
+        error: failure
+      })
+    } 
   }
 }
 
-//********************START******************************
-//add function definition
-//note function doesnt update if user drops out
-//*********************END*****************************
+/*!
+ * This function makes a post request to the server in order to update the current
+ * users. When receiving the package, this function will use either RESTFUL or Protocol buffers 
+ * in order to parse the requested information. On success, this funciton will add the new users
+ * to the current list, and on failure it will log the error and alert once that we failed to load users
+ * or that we failed to load groups, but not both. If the users are the same as the last request that
+ * was made, the list of users on the webpage is left untouched.
+ */
 function updateUsers(){
+  //On success, check if new users added and if so add them
   success = function(users) {
     if (useProto){
       var Usrmsg = UsrGrpClient.decode(users);
       users = Usrmsg.members;
     }
 
-    //********************START******************************
-    //change to be more efficient
     var second_index = useProto ? 'id' : 0 ;
-    //*********************END*****************************
 
     //If we see that we have more users than the global count
     if (users.length > global_user_count) {
@@ -280,14 +299,23 @@ function updateUsers(){
     }
   }
 
-  //********************START******************************
-  //get success and error to work
+  //if users failed to load, log and alert if first time
+  failure = function() {
+    console.log("Failed to load users");
+
+    //If we have not thrown an alert yet, notify user that we cannot load users
+    if (!usr_grp_load_error){
+      alert('Failed to load users');
+      usr_grp_load_error = true;
+    }
+  }
+
   if (useProto){
     $.ajax({
       url: "get_users",
       success: success,
       responseType: 'arraybuffer',
-      error: function(data){console.log('fed')}
+      error: failure
     });
   }
   else{
@@ -295,27 +323,27 @@ function updateUsers(){
       dataType: "json",
       url: "get_users",
       data: {format:'json'},
-      success: success
+      success: success,
+      error: failure
     });
   }
-  //*********************END*****************************
 }
 
-//********************START******************************
-//add function definition
-//note function doesnt update if user drops out
-//*********************END*****************************
+/*!
+ * This function is similar to updateUsers() except it is specifically for groups
+ * could eventually be combined into one function but left separate during development
+ */
 function updateGroups(){
+  //On success, check if new groups added and if so add them
   success = function(groups) {
     if (useProto){
       var Groupmsg = UsrGrpClient.decode(groups);
       groups = Groupmsg.members;
     }
-    //********************START******************************
-    //change to be more efficient
+
     var second_index = useProto ? 'id' : 0 ;
-    //*********************END*****************************
-    //If we see that we have more users than the global count
+
+    //If we see that we have more groups than the global count
     if (groups.length > global_groups_count) {
       
       global_groups_count = groups.length
@@ -329,7 +357,7 @@ function updateGroups(){
           groups_data = {}
           if (useProto){
             groups_data.group_id = group['id']
-            groups_data.group_name = group['group_name']
+            groups_data.group_name = group['name']
           }
           else{
             groups_data.group_id = group[0]
@@ -352,14 +380,23 @@ function updateGroups(){
     }
   } 
 
-  //********************START******************************
-  //get success and error to work
+  //if users failed to load, log and alert if first time
+  failure = function() {
+    console.log("Failed to load groups");
+
+    //If we have not thrown an alert yet, notify user that we cannot load groups
+    if (!usr_grp_load_error){
+      alert('Failed to load groups');
+      usr_grp_load_error = true;
+    }
+  }
+
   if (useProto){
     $.ajax({
       url: "get_groups",
       success: success,
       responseType: 'arraybuffer',
-      error: function(data){console.log('fed')}
+      error: failure
     });
   }
   else{
@@ -367,16 +404,16 @@ function updateGroups(){
       dataType: "json",
       url: "get_groups",
       data: {format:'json'},
-      success: success
+      success: success,
+      error: failure
     });
   }
-  //*********************END*****************************
 }
 
-//********************START******************************
-//add function definition
-// Adds the visual chat message to the message list
-//*********************END*****************************
+/*!
+ * This function takes in a message object containing a username and
+ * message field, and displays the message in the chat field on the main page
+ */
 function addChatMessage (data, options) {
   // Don't fade the message in if there is an 'X was typing'
   var $typingMessages = getTypingMessages(data);
@@ -401,15 +438,12 @@ function addChatMessage (data, options) {
   addMessageElement($messageDiv, options);
 }
 
-
-//********************START******************************
-//add function definition
-// Adds a message element to the messages and scrolls to the bottom
-// el - The element to add as a message
-// options.fade - If the element should fade-in (default = true)
-// options.prepend - If the element should prepend
-//   all other messages (default = false)
-//*********************END*****************************
+/*!
+ * This function adds a message element to the messages and scrolls to the bottom
+ * el - The element to add as a message
+ * options.fade - If the element should fade-in (default = true)
+ * options.prepend - If the element should prepend
+ */
 function addMessageElement (el, options) {
   var $el = $(el);
 
@@ -513,44 +547,46 @@ $('#g_sel').change(function(){
   updateInfo('#g_sel', GROUP, '#u_sel')
 });
 
-//********************START******************************
+/*!
+ * This is the callback for when the creategroup button is pressed
+ * user is alerted whether the group was successfully created or not
+ */
 $('.modalCreateButton').click(function (){
+  //users added to group
   var values = $("#group_select>option:selected").map(function() { return parseInt($(this).val()); });
-  var name = cleanInput($("#group_name").val())
   values = cleanInput(values.get())
+
+  //name of group
+  var name = cleanInput($("#group_name").val())
+  
   $("#group_select>option:selected").removeAttr("selected");
   $('.ui.dropdown').dropdown('restore defaults'); 
-  $('#group_name').val('')
+  $('#group_name').val('');
   
-  if (!useProto){
-    data = {user_ids: values, group_name:name}
-      $.ajax({
-        type: "POST",
-        dataType: "json",
-        url: 'create_group',
-        data: data,
-        success: function(data) {console.log('Success')}
-       });
+  data = {user_ids: values, name:name}
+  if (useProto){
+    data_client = new UsrGrp(data);
+    data = {protoString: data_client.toBase64()}
+  }
 
-      }else{
-        data = {name:name, user_ids: values}
-        console.log("using proto")
-        data_client = new UsrGrp(data);
-    
-        success = function() {
-          console.log("successful return")
-        }
-         $.ajax({
-          type: "POST",
-          beforeSend: function (request){request.setRequestHeader("Accept", "application/x-protobuf");},
-          url: "create_group", 
-          data: {protoString: data_client.toBase64()}, 
-          success: function(data) {console.log('Success')},
-          error: function(data){console.log('failure'); console.log(data_client)}
-        })
-      }
+  failure = function() {
+    console.log("Failed to create group");
+    alert("Failed to create group");
+  }
+  success = function (){
+    console.log("Successfully created new group");
+    alert("Successfully created new group");
+  }
+
+  $.ajax({
+    type: "POST",
+    url: 'create_group',
+    data: data,
+    success: success,
+    error: failure
+   });
+  
 })
-//*********************END*****************************
 
 //When the document is ready, update 
 $(document).ready(updateAll());
