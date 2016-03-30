@@ -18,14 +18,6 @@ MESSENGER:
 		-document protobuff stuff
 		-comments
 
-	static:
-		content:
-			-style.css
-				-possibly comment the things we added
-				-maybe clean up if possible
-				-maybe add something to readme about css folder and what its for
-
-
 
 
 

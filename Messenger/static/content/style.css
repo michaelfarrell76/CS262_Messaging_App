@@ -1,4 +1,6 @@
-/* Fix user-agent */
+/*!
+ * This is the main css file for the chat application
+ */ 
 
 * {
   box-sizing: border-box;

@@ -1,6 +1,6 @@
 /*!
  * This is the main javascript file for the chat application
- * It contains support for the itmes on the main index page which
+ * It contains support for the items on the main index page which
  * mainly just communicates with the server and constantly refreshes 
  * the users, groups and messages to reflect the current information. 
  *
