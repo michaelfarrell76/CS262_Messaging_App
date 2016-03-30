@@ -54,12 +54,30 @@ There is also a button that can be used to toggle between RESTFUL and protocol b
     
 
 # Setup
-- pip install flask
-- pip install mysql
-- pip install flask_login
-- If you see some error with dll's, run the below command:
+
+Installations you may need:
+
+	pip install flask
+	pip install mysql
+	pip install flask_login
+	pip install sqlalchemy
+	pip install protobuf_to_dict
+
+If you do not have google's protocol buffers installed do so by following the instructions [here](https://github.com/google/protobuf/tree/master/python)
+	
+Ensure that protoc is installed with
+
+	protoc --version
+
+If you see some error with dll's, run the below command:
+
 	brew install --upgrade openssl; brew unlink openssl && brew link openssl --force
-- To run the server, run python application.py
+	
+Once all of these are installed, cd into the Messaging folder and start up the server with 
+	
+	python application.py
+	
+If the server boots, you should be good to go
 
 # Description
 For our CS262 project, we implemented protocol buffers and a RESTFUL API. On top of this, we built a web UI to interact with the server. The database is deployed online on AWS. Interact with the right side bar to find users to message and create and find groups to message. Authentication has also been implemented as well. You can also login, logout, and delete your account.
