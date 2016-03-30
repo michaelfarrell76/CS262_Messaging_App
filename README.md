@@ -31,26 +31,26 @@ There is also a button that can be used to toggle between RESTFUL and protocol b
     
     
     auth
-    ├── __init__.py
+    ├── __init__.py	
     └── auth.py
     
     static
-    ├── content
-    |	└── style.css
-    ├── js
-    |	├── ByteBufferAB.min.js
-    |   ├── login.js
-    |   ├── main.js
-    |   ├── modal.js
-    |   └── protoCode.js
-    └──	message.proto
+    ├── content				# Holds stylesheets
+    |	└── style.css					# Our main stylesheet for the website
+    ├── js				    # Holds js files
+    |	├── ByteBufferAB.min.js		# JS file used to send ProtocolBuffers
+    |   ├── login.js					# JS file for login/register pages
+    |   ├── main.js					# The main JS file used for the chat portion of the site
+    |   ├── modal.js					# Used to help load ProtocolBuffers
+    |   └── protoCode.js				# Another JS file for ProtocolBuffers
+    └──	message.proto	
     
     templates
-    ├── create_group.html
-    ├── index.html
-    ├── layout.html
-    ├── login.html
-    └── register.html
+    ├── create_group.html		# HTML popup used to create groups
+    ├── index.html			# HTML for tje main chat page
+    ├── layout.html			# Flask layout html file used to mask other html files
+    ├── login.html			# HTML for the login page
+    └── register.html			# HTML for the register page
     
 
 # Setup
