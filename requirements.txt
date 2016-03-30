@@ -2,5 +2,10 @@ Flask==0.10.1
 sqlalchemy==1.0.5
 flask_login==0.3.2
 werkzeug==0.10.4
-protobuf_to_dict
 mysql
+google.protobuf
+ast
+json
+werkzeug.security
+base64
+optparse
