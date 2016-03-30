@@ -1,15 +1,36 @@
 #General
-	This is a general web-based messeneger application with a python backend. It has support for using both [Protocol Buffers](https://developers.google.com/protocol-buffers/) and [RESTFUL](http://www.tutorialspoint.com/restful/) as the communication method between the frontend and backend. This project was created for a course at Harvard University: CS 262, Distributed Systems.
+This is a general web-based messeneger application with a python backend. It has support for using both [Protocol Buffers](https://developers.google.com/protocol-buffers/) and [RESTFUL](http://www.tutorialspoint.com/restful/) as the communication method between the frontend and backend. This project was created for a course at Harvard University: CS 262, Distributed Systems.
 
-	You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login) (http://cs262chat.us-east-1.elasticbeanstalk.com/login), or if you wish to run this locally, it can be done with the command:
+You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login), or if you wish to run this locally, it can be done with the command:
+
 	python application.py --protobuff
+	
 to use protocol buffers and:
+
 	python application.py 
+	
 to use RESTFUL
 
+There is also a button that can be used to toggle between RESTFUL and protocol buffers in the web application itself.
 
+# Folder Structure
 
-There is also a toggle between RESTFUL and protocol buffers in the application itself. 
+    .
+    ├── Messenger                    # Test files (alternatively `spec` or `tests`)
+    │   ├── benchmarks          # Load and stress tests
+    │   ├── integration         # End-to-end, integration tests (alternatively `e2e`)
+    │   └── unit                # Unit tests
+    └── ...
+    
+    
+    .
+    ├── Me                   # Compiled files (alternatively `dist`)
+    ├── docs                    # Documentation files (alternatively `doc`)
+    ├── src                     # Source files (alternatively `lib` or `app`)
+    ├── test                    # Automated tests (alternatively `spec` or `tests`)
+    ├── tools                   # Tools and utilities
+    ├── LICENSE
+    └── README.md
 
 # Setup
 - pip install flask
