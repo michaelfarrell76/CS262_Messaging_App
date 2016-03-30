@@ -21,7 +21,7 @@ import flask
 from flask import request, Response, render_template, flash, redirect
 import json
 
-# Modules used for authoentication of the user
+# Modules used for authentication of the user
 from auth.auth import User
 import flask.ext.login as flask_login
 from flask_login import LoginManager, current_user

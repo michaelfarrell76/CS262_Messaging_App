@@ -13,12 +13,6 @@ General:
 -use pydocs?
 
 MESSENGER:
-	-_init_.py, config.py:
-		-done by kevin
-		-include what they do how they interact
-		-update so theyre used correctly
-		-include documentation on how the whole flask program works together (conceptually and filewise)
-	
 	-application.py
 		-clean code
 		-document use of libraries
