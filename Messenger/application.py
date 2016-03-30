@@ -29,14 +29,10 @@ from werkzeug.security import generate_password_hash, \
      check_password_hash
 
 # Used for protobufs
-
 import message_pb2
 import base64
 import optparse
-
-
 global USE_PROTOBUFF 
-
 USE_PROTOBUFF = False
 USER = 0
 GROUP = 1
@@ -70,7 +66,6 @@ def user_loader(user_id):
     the user_id stored in session. This follows the standard approach for the
     flask-login module.
     """
-
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result_proxy = s.execute('SELECT name, email FROM users WHERE id = "' + user_id + '" LIMIT 1')
@@ -90,7 +85,6 @@ def request_loader(request):
     valid in the database. This enures that all users do not retain access if a user 
     is deleted or a password has changed. 
     """
-
     email = request.form.get('email')
     if email is not None:
         Session = scoped_session(sessionmaker(bind=engine))
@@ -379,6 +373,9 @@ def logout():
 
 @application.route('/transfer')
 def transfer():
+    """
+    Endpoint that allows user to toggle between protocol buffers and REST. 
+    """
     global USE_PROTOBUFF 
     print(USE_PROTOBUFF)
     USE_PROTOBUFF = not USE_PROTOBUFF
@@ -386,6 +383,9 @@ def transfer():
 
 @application.route('/delete_account')
 def delete_account():
+    '''
+    Endpoint that allows account to be deleted. Logs out the user before deleting.
+    '''
     Session = scoped_session(sessionmaker(bind=engine))
     uid_to_delete = current_user.id
     flask_login.logout_user()
@@ -398,6 +398,11 @@ def delete_account():
 
 @application.route('/create_group', methods=['POST', 'GET'])
 def create_group():
+    '''
+    Endpoint that allows the user to generate a group. GET request generates
+    the form required to create the group. POST request makes the DB calls to
+    create the group. 
+    '''
     global USE_PROTOBUFF 
     if request.method == 'POST':
 
@@ -448,6 +453,11 @@ def create_group():
 
 @application.route('/get_groups', methods=['POST', 'GET'])
 def get_groups():
+    '''
+    This endpoint allows the user to get all available groups that can be talked to. 
+    The groups that a user sees are based off of the permissions that they have available
+    to them. 
+    '''
     global USE_PROTOBUFF 
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
@@ -478,6 +488,10 @@ def get_groups():
 
 
 if __name__ == '__main__':
+    ''' 
+    Main function that allows options to be configured for the server.
+    Runs the server on a specified host.
+    '''
     parser = optparse.OptionParser()
     parser.add_option('--protobuff', action="store_true", default=False)
 
