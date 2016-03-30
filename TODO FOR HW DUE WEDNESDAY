@@ -4,12 +4,9 @@ General:
 -README.MD
 	-add auth details to folder structure
 	-update description section in readme to talk about the various things
-	-folder interaction
-	-add library section to readme
-	-Templates/index.html: talk about why libraries are added
-	-js/ByteBufferAB.min.js, modal.js, protocode.js: readme about libraries
-	-MESSENGER/message.proto, message_pb2.py: document in readme
-	-js/main.js : document in readme
+	-detail library section
+	-section on proto stuff, MESSENGER/message.proto, message_pb2.py: document in readme
+	-js/main.js, application.py interaction
 -requirements.txt
 	-update to reflect current state
 -use pydocs?
@@ -22,10 +19,6 @@ MESSENGER:
 		-document json stuff
 		-document protobuff stuff
 		-comments
-
-	auth:
-		-_init_.py, auth.py
-			-Hopefully kevins got this, should be quick
 
 	static:
 		content:
