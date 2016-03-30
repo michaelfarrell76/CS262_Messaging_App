@@ -1,4 +1,7 @@
-#General
+# 262Chat
+
+![Image](http://iosicongallery.com/img/256/flow-chat-2015.png)
+
 This is a general web-based messeneger application with a python backend. It has support for using both [Protocol Buffers](https://developers.google.com/protocol-buffers/) and [RESTFUL](http://www.tutorialspoint.com/restful/) as the communication method between the frontend and backend. This project was created for a course at Harvard University: CS 262, Distributed Systems.
 
 You can access a live version of our chat application deployed on AWS [here](http://cs262chat.us-east-1.elasticbeanstalk.com/login), or if you wish to run this locally, it can be done with the command:
@@ -127,13 +130,13 @@ Python
 
 # Functionality
 
-- [x] List accounts 
-- [x] Create a group
-- [x] List groups 
-- [x] Send a message. If the message is sent to an account, send a single message; if it is sent to a group, send to all members of the group.
-- [x] If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand
-- [x] Deliver undelivered messages
-- [x] Delete an account
+- List accounts 
+- Create a group
+- List groups 
+- Send a message. If the message is sent to an account, send a single message; if it is sent to a group, send to all members of the group.
+- If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand
+- Deliver undelivered messages
+- Delete an account
 
 # Authors
 - Kevin Yang
