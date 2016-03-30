@@ -9,17 +9,6 @@ General:
 
 -use pydocs?
 
-MESSENGER:
-	-application.py
-		-clean code
-		-document use of libraries
-		-document flask stuff
-		-document json stuff
-		-document protobuff stuff
-		-comments
-
-
-
 
 
 

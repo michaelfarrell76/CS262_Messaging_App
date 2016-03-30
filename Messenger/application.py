@@ -4,11 +4,9 @@ Generates routes and views for the flask application.
 """
 
 # Module used for managing configuration and setup
-import os
-import sys
-import time
+import os, sys, time
 
-# Used for parsing responses from the database
+# Used for parsing responses from the database, sql items
 import ast
 from datetime import datetime
 from sqlalchemy import exc
@@ -21,17 +19,23 @@ import flask
 from flask import request, Response, render_template, flash, redirect
 import json
 
-# Modules used for authentication of the user
+# Modules used for authentication of the user and checking passwords
 from auth.auth import User
 import flask.ext.login as flask_login
 from flask_login import LoginManager, current_user
 from werkzeug.security import generate_password_hash, \
      check_password_hash
 
-# Used for protobufs
+# Generate by protoc to work with messages.proto
 import message_pb2
+
+#Used to convert protocol buffer string to and from base64
 import base64
+
+#library to parse command line arguments
 import optparse
+
+#globals
 global USE_PROTOBUFF 
 USE_PROTOBUFF = False
 USER = 0
@@ -94,9 +98,7 @@ def request_loader(request):
         if result_proxy is None:
             return
         result = result_proxy.fetchone()
-        user_id = result[0]
-        name = result[1]
-        password = result[2]
+        user_id, name, password = result[0], result[1], result[2]
         user = User(user_id, name, email)
         user.is_authenticated = generate_password_hash(request.form['password']) == password    
         application.logger.error(user)
@@ -138,12 +140,14 @@ def login():
         s.close()
         result = result_proxy.fetchone()
 
+        #No email address
         if result == None:
             flash('Email Address not found')
             return json.dumps({}, 500, {'ContentType':'application/json'})
         
         true_password = result[2]
 
+        #check to see if the correct password was used
         if check_password_hash(true_password, password):
             user_id = result[0]
             name = result[1]
@@ -154,7 +158,7 @@ def login():
             application.logger.debug(data)
             resp = Response(data, status=200, mimetype='application/json')
             return json.dumps(data, 200, {'ContentType':'application/json'})
-        else:
+        else: #passwords dont match
             flash('Passwords do not match')
             return json.dumps({}, 500, {'ContentType':'application/json'})
     else:
@@ -178,12 +182,16 @@ def register():
         result_proxy = s.execute('SELECT * FROM users WHERE email = "' + email + '" LIMIT 1')
         s.close()
         result = result_proxy.fetchone()
+
+        #email already registered
         if result is not None:
             flash('That email has already been registered')
             return json.dumps({}, 403, {'ContentType':'application/json'})
         try:
             Session = scoped_session(sessionmaker(bind=engine))
             s = Session()
+
+            #insert new user
             s.execute('INSERT INTO users(name, email, password) VALUES ("' + str(name) + '","' + str(email) + '","' + str(password) + '")') 
             result_proxy = s.execute ('SELECT * FROM users WHERE email = "' + email + '" LIMIT 1')
             s.commit()
@@ -213,8 +221,8 @@ def send_message():
     global USE_PROTOBUFF 
 
     if USE_PROTOBUFF:
+        #prepare to receive information about who we are messaging
         MsgClient = message_pb2.MsgClient()
-
         result = base64.b64decode(request.form['protoString'])
         MsgClient.ParseFromString(result)
 
@@ -228,23 +236,26 @@ def send_message():
         message = request.form['message']
 
 
-
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
 
+    #if we're chatting a user
     if select_type == USER:
+        #build user_ids in numerical order
         user_ids = sorted([current_user.id, other_id])
         users_str = '"[' + ", ".join(user_ids) + ']"'
         query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' % users_str
         result_proxy = s.execute(query)
         result = result_proxy.fetchone()
+
+        #start a new messaging session if doesn't exist
         if result is None:
             query = 'insert into groups (groupname, user_ids) VALUES("twousers", %s)' % users_str
             s.execute(query)
             query = 'SELECT * from groups WHERE user_ids = %s LIMIT 1' % users_str
             result_proxy = s.execute(query)
             result = result_proxy.fetchone()
-    else:
+    else: #we're chatting a group
         query = 'SELECT * from groups WHERE group_id = %s LIMIT 1' % other_id
         result_proxy = s.execute(query)
         result = result_proxy.fetchone()
@@ -252,8 +263,7 @@ def send_message():
     group_id = result[0]
     group_name = result[1]
 
-    
-
+    #add message to messages db
     pkg = (str(current_user.id), str(message) , time.strftime("%Y-%m-%d %H:%M:%S"), group_id)
     query = 'INSERT INTO messages(user_id, message, time_sent, group_id) '  + \
                         'VALUES ("%s", "%s", "%s", %d)' % pkg
@@ -275,13 +285,11 @@ def get_message():
 
     if USE_PROTOBUFF:
         PreMsgClient = message_pb2.MsgClient()
-
         result = base64.b64decode(request.form['protoString'])
         PreMsgClient.ParseFromString(result)
 
         other_user = str(PreMsgClient.id)
         select_type = PreMsgClient.chat_type
-
     else:
         other_user =  request.form['user_id']
         select_type =  int(request.form['select_type'])
@@ -291,6 +299,7 @@ def get_message():
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     
+    #grab the group id for the messages that we want
     if select_type == USER:
         user_ids = sorted([current_user.id, other_user])
         users_str = '"[' + ", ".join(user_ids) + ']"'
@@ -303,11 +312,13 @@ def get_message():
         group_id = result[0]
     else:
         group_id = other_user
- 
+    
+    #grab all messages for the chat
     result_proxy = s.execute('SELECT messages.id, users.name, messages.message from messages JOIN users ON users.id=messages.user_id where group_id = %s' % group_id)
     s.close()
     results = result_proxy.fetchall()
 
+    #parse messages into return datastructure
     for result in reversed(results):
         message_id = result[0]
         name = result[1]
@@ -337,6 +348,7 @@ def get_users():
     """
 
     global USE_PROTOBUFF 
+
     Session = scoped_session(sessionmaker(bind=engine))
     s = Session()
     result = s.execute('SELECT * FROM users')
@@ -346,8 +358,9 @@ def get_users():
     out = []
 
     for result in results:
-        user_id = result[0]
-        name = result[1]
+        user_id, name = result[0], result[1]
+
+        #only add the users that aren't the current user
         if user_id != int(current_user.id):
             if USE_PROTOBUFF:
                 out.append(message_pb2.UsrGrp(
@@ -357,7 +370,6 @@ def get_users():
             else:
                 out.append((user_id, name))
     if USE_PROTOBUFF:
-        print(out)
         UsrUsrs = message_pb2.UsrGrpClient(members = out)
         return base64.b64encode(UsrUsrs.SerializeToString())
     else:
@@ -408,7 +420,6 @@ def create_group():
 
         if USE_PROTOBUFF:
             GrpCreateClient = message_pb2.UsrGrp()
-
             result = base64.b64decode(request.form['protoString'])
             GrpCreateClient.ParseFromString(result)
 
@@ -418,17 +429,20 @@ def create_group():
             name = request.form['name']
             user_ids = request.form['user_ids']
        
-       
+        #parse string of users into integer array
         user_ids = user_ids.split(',')
         user_ids = [int(user_id) for user_id in user_ids]
         user_ids.append(int(current_user.id))
-
         user_ids.sort()
+
+        #make sure that the group has more than 2 people
         if len(user_ids) <= 2:
             flash('Groups must be made with more than 2 people')
             return json.dumps({}, 403, {'ContentType':'application/json'})
         
         user_ids = str(user_ids)
+
+        #make sure the group has not been created yet
         Session = scoped_session(sessionmaker(bind=engine))
         s = Session()
         result_proxy = s.execute('SELECT * FROM groups WHERE user_ids = "' + user_ids + '" LIMIT 1')
@@ -437,6 +451,8 @@ def create_group():
         if result is not None:
             flash('That group has already been created')
             return json.dumps({}, 403, {'ContentType':'application/json'})
+        
+        #create group
         try:
             Session = scoped_session(sessionmaker(bind=engine))
             s = Session()
@@ -471,6 +487,8 @@ def get_groups():
         group_id = result[0]
         group_name = result[1]
         user_ids = ast.literal_eval(result[2])
+
+        #groups are only the ones that contain more than two people
         if len(user_ids) > 2 and int(current_user.id) in user_ids:
             if USE_PROTOBUFF:
                 out.append(message_pb2.UsrGrp(
@@ -492,15 +510,16 @@ if __name__ == '__main__':
     Main function that allows options to be configured for the server.
     Runs the server on a specified host.
     '''
+
+    #determine if using protocol buffer or not
     parser = optparse.OptionParser()
     parser.add_option('--protobuff', action="store_true", default=False)
-
     options, args =  parser.parse_args()
-
     USE_PROTOBUFF = options.protobuff
 
     if USE_PROTOBUFF:
         print('Running with Protobuffs')
     else:
         print('Running with REST')
+        
     application.run(host='0.0.0.0')
