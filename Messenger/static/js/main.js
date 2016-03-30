@@ -305,7 +305,7 @@ function updateUsers(){
 
     //If we have not thrown an alert yet, notify user that we cannot load users
     if (!usr_grp_load_error){
-      alert('Failed to load users');
+      alert('Failed to load users, someone may have switched the method, try refreshing the page');
       usr_grp_load_error = true;
     }
   }
@@ -386,7 +386,7 @@ function updateGroups(){
 
     //If we have not thrown an alert yet, notify user that we cannot load groups
     if (!usr_grp_load_error){
-      alert('Failed to load groups');
+      alert('Failed to load groups, someone may have switched the method, try refreshing the page');
       usr_grp_load_error = true;
     }
   }
