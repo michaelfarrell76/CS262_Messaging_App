@@ -130,13 +130,13 @@ Python
 
 # Functionality
 
-- List accounts 
-- Create a group
-- List groups 
-- Send a message. If the message is sent to an account, send a single message; if it is sent to a group, send to all members of the group.
-- If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand
-- Deliver undelivered messages
-- Delete an account
+- [x] List accounts 
+- [x] Create a group
+- [x] List groups 
+- [x] Send a message. If the message is sent to an account, send a single message; if it is sent to a group, send to all members of the group.
+- [x] If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand
+- [x] Deliver undelivered messages
+- [x] Delete an account
 
 # Authors
 - Kevin Yang
