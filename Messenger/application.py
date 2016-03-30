@@ -29,10 +29,11 @@ from werkzeug.security import generate_password_hash, \
      check_password_hash
 
 # Used for protobufs
+
 import message_pb2
-from protobuf_to_dict import protobuf_to_dict
 import base64
 import optparse
+
 
 global USE_PROTOBUFF 
 
