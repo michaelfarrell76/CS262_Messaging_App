@@ -79,37 +79,51 @@ Once all of these are installed, cd into the Messaging folder and start up the s
 If the server boots, you should be good to go
 
 # Description
-For our CS262 project, we implemented protocol buffers and a RESTFUL API. On top of this, we built a web UI to interact with the server. The database is deployed online on AWS. Interact with the right side bar to find users to message and create and find groups to message. Authentication has also been implemented as well. You can also login, logout, and delete your account.
+
+This is a chat applications that we made for CS262 to demonstrate the use of REST and protocol buffers as methods of communication.
+
+# Built on
+
+We use a Python Flask server and client-side Javascript to relay messages between server and client. The Web UI uses Javascript to communicate with the server using various URL end points. Messages are transmitted as JSON when using REST and as binary in protobuff encoding when using protocol buffers. We use a SQL database hosted on AWS as our datastore for messages, user and group information. The Flask server uses remote SQL queries to put and get data from the database. 
+
+# How to use?
+
+Once you have the python server running, browse to the following address from your browser:
+
+	http://locahost:5000
+
+Here you can login or register for a new account. Once you are logged in you can use the right-hand panel to select the user you want to chat with. You also have the option of chatting with a group that you are a part of. If you are not part of any group, you can use the "Create Group" button to choose other users with which to be in a group with. Once this is done, whenever you send a message to the group, its visible to all the users in the group. 
+
+At all times, the application shows the protocol being used by the chat application in the upper left corner. You can seemlessly swith between REST and protocol buffers using the switch button under "Methods"
 
 # Libraries
 
 JS/CSS
-- bootstrap
-- select2
-- semantic
-- jquery
-- modal
-- ByteBufferAB
-- ProtoCode
-- bytebuffer
-- protobuf
-- long
-- angular
+- *bootstrap*: Twitter web-framework, makes building the structure of a website very simple
+- *select2*: Provides a customizable select box, used to make select boxes on side-bar
+- *semantic*: Makes it easy to build custom UI items
+- *jQuery*: Makes writing Javascript easier, less verbose and more intutive.
+- *modal*: Makes it easier for us to show the modal for create group
+- *ProtoCode*: Convert .proto files to a javascript dictionary
+- *bytebuffer*: Deals with binary data in Javascript
+- *protobuf*: Encodes and decode .proto files
+- *long*: long integer values
+- *angular*: makes interactions on the web easier
 
 Python
-- os
-- sys
-- time
-- ast
-- datetime
-- sqlalchemy
-- mysql
-- flask
-- json
-- flask_login
-- werkzeug.security
-- base64
-- optparse
+- *os*: Operating System operations in Python, mainly used for file-handling 
+- *sys*: Provides access to variable maintained by the interpreter
+- *time*: Time module in Python
+- *ast*: Help with interpreting string encoding
+- *datetime*: Date Time module in Python
+- *sqlalchemy*: Allows us to easily access databases using Python
+- *mysql*: Handles SQL requests to database
+- *flask*: Provides a server in Python
+- *json*: Allows us to deal with JSON data in Python easily
+- *flask_login*: Built-in login module, helps with auth and registration
+- *werkzeug.security*: Helps in HTML generation
+- *base64*: Convert from and to base64 encoding
+- *optparse*: Allows us to parse command line options
 
 # Functionality
 
@@ -120,4 +134,10 @@ Python
 - If the recipient is logged in, deliver immediately; otherwise queue the message and deliver on demand
 - Deliver undelivered messages
 - Delete an account
+
+# Authors
+- Kevin Yang
+- Micheal Farrell
+- Muhammad Ibrahim
+- Ana-Maria Constantin
 
