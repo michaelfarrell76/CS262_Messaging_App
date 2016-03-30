@@ -31,8 +31,7 @@ There is also a button that can be used to toggle between RESTFUL and protocol b
     
     
     auth
-    ├── __init__.py	
-    └── auth.py
+    └── auth.py		# Contains definition of User for flask_login
     
     static
     ├── content				# Holds stylesheets
