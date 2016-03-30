@@ -81,7 +81,38 @@ If the server boots, you should be good to go
 # Description
 For our CS262 project, we implemented protocol buffers and a RESTFUL API. On top of this, we built a web UI to interact with the server. The database is deployed online on AWS. Interact with the right side bar to find users to message and create and find groups to message. Authentication has also been implemented as well. You can also login, logout, and delete your account.
 
+# Libraries
+
+JS/CSS
+- bootstrap
+- select2
+- semantic
+- jquery
+- modal
+- ByteBufferAB
+- ProtoCode
+- bytebuffer
+- protobuf
+- long
+- angular
+
+Python
+- os
+- sys
+- time
+- ast
+- datetime
+- sqlalchemy
+- mysql
+- flask
+- json
+- flask_login
+- werkzeug.security
+- base64
+- optparse
+
 # Functionality
+
 - List accounts 
 - Create a group
 - List groups 
