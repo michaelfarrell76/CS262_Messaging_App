@@ -2,7 +2,6 @@ TODO
 
 General:
 -README.MD
-	-add auth details to folder structure
 	-update description section in readme to talk about the various things
 	-detail library section
 	-section on proto stuff, MESSENGER/message.proto, message_pb2.py: document in readme
