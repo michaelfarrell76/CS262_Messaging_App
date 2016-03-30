@@ -6,8 +6,7 @@ General:
 	-detail library section
 	-section on proto stuff, MESSENGER/message.proto, message_pb2.py: document in readme
 	-js/main.js, application.py interaction
--requirements.txt
-	-update to reflect current state
+
 -use pydocs?
 
 MESSENGER:
