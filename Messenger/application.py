@@ -211,6 +211,7 @@ def register():
         )
 
 @application.route('/send_message', methods=['POST'])
+@flask_login.login_required
 def send_message():
     """
     This endpoint is hit via an AJAX call whenever a message is sent. Depending on 
@@ -273,6 +274,7 @@ def send_message():
     return json.dumps({}, 200, {'ContentType':'application/json'})
 
 @application.route('/get_messages', methods=['POST'])
+@flask_login.login_required
 def get_message():
     """
     This endpoint is hit via an AJAX POST call periodically at intervals specified
@@ -339,6 +341,7 @@ def get_message():
         return json.dumps(out)
 
 @application.route('/get_users')
+@flask_login.login_required
 def get_users():
     """
     This endpoint is hit via an AJAX POST request periodically at intervals specified 
@@ -376,6 +379,7 @@ def get_users():
         return json.dumps(out)
 
 @application.route('/logout')
+@flask_login.login_required
 def logout():
     """
     Endpoint that allows a user to logout. Logout buttons are linked this endpoint
@@ -384,6 +388,7 @@ def logout():
     return redirect("login", code=302)
 
 @application.route('/transfer')
+@flask_login.login_required
 def transfer():
     """
     Endpoint that allows user to toggle between protocol buffers and REST. 
@@ -394,6 +399,7 @@ def transfer():
     return redirect("/", code=302)
 
 @application.route('/delete_account')
+@flask_login.login_required
 def delete_account():
     '''
     Endpoint that allows account to be deleted. Logs out the user before deleting.
@@ -409,6 +415,7 @@ def delete_account():
     return redirect("login", code=302)
 
 @application.route('/create_group', methods=['POST', 'GET'])
+@flask_login.login_required
 def create_group():
     '''
     Endpoint that allows the user to generate a group. GET request generates
@@ -468,6 +475,7 @@ def create_group():
         )
 
 @application.route('/get_groups', methods=['POST', 'GET'])
+@flask_login.login_required
 def get_groups():
     '''
     This endpoint allows the user to get all available groups that can be talked to. 
@@ -521,5 +529,5 @@ if __name__ == '__main__':
         print('Running with Protobuffs')
     else:
         print('Running with REST')
-        
+
     application.run(host='0.0.0.0')
