@@ -61,7 +61,6 @@ Installations you may need:
 	pip install mysql
 	pip install flask_login
 	pip install sqlalchemy
-	pip install protobuf_to_dict
 
 If you do not have google's protocol buffers installed do so by following the instructions [here](https://github.com/google/protobuf/tree/master/python)
 	
